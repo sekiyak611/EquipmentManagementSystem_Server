@@ -1,1 +1,2 @@
 # EquipmentManagementSystem
+備品管理システムのバックエンドのソースを管理する
