@@ -1,0 +1,3 @@
+// Eclipse は、ワークスペースの直下にあるプロジェクトの名前を、フォルダ名と同じにする必要がある。
+// そのため、プロジェクト名はリポジトリのフォルダ名（EquipmentManagementSystem_Server）にする。
+rootProject.name = 'EquipmentManagementSystem_Server'

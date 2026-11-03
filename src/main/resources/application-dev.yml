@@ -1,0 +1,6 @@
+# 開発用の設定（各自のPCで動かすとき）
+spring:
+  datasource:
+    # 各自のPCのMySQLの、開発用のデータベース。
+    # connectionTimeZone：データベースとのやり取りを日本時間（+09:00）にそろえる
+    url: jdbc:mysql://localhost:3306/equipment_dev?connectionTimeZone=%2B09:00&forceConnectionTimeZoneToSession=true&characterEncoding=UTF-8

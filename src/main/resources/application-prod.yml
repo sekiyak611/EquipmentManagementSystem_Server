@@ -1,0 +1,17 @@
+# 本番（AWS）の設定。
+# データベースの接続先やパスワードなどは、環境変数で渡す（例：SPRING_DATASOURCE_URL、SPRING_DATASOURCE_PASSWORD、APP_BASE_URL、APP_SLACK_BOT_TOKEN）。
+# パラメータストアから環境変数に入れる方法は、AWSの環境を作るタスク（ZPOP-48）で決める。
+server:
+  servlet:
+    session:
+      cookie:
+        # HTTPSのときだけクッキーを送る（docs/API設計.md 2.2）
+        secure: true
+  # CloudFront・ALBを通ってきたことを、送られてきた見出し（X-Forwarded-*）から読み取る。
+  # 実際の通り道に合っているかは、AWSの環境を作るタスク（ZPOP-48）で確かめる
+  forward-headers-strategy: framework
+
+app:
+  test-support:
+    # 本番では必ず無効（CLAUDE.md 5章）
+    enabled: false

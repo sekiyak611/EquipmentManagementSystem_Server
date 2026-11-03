@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ログ（システムの記録）の形（docs/API設計.md 7章）。
+  1行に1件。日時・重要度・操作した人のユーザID・内容を出す。
+  ユーザIDは common.security.UserIdLogFilter が入れる（ログインしていないときは「-」）。
+  パスワード、リンクの合言葉、Slackのトークン、クッキーの中身は、ログに出さない（CLAUDE.md 5章）。
+-->
+<configuration>
+	<property name="LOG_PATTERN"
+		value="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX, Asia/Tokyo} %-5level userId=%X{userId:--} [%thread] %logger{36} - %msg%n"/>
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<!-- 開発：画面への表示と、backend/logs フォルダのファイルの両方に出す（ファイルは1日ごと、30日分残す） -->
+	<springProfile name="dev">
+		<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<file>logs/equipment.log</file>
+			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+				<fileNamePattern>logs/equipment.%d{yyyy-MM-dd}.log</fileNamePattern>
+				<maxHistory>30</maxHistory>
+			</rollingPolicy>
+			<encoder>
+				<pattern>${LOG_PATTERN}</pattern>
+				<charset>UTF-8</charset>
+			</encoder>
+		</appender>
+		<root level="INFO">
+			<appender-ref ref="CONSOLE"/>
+			<appender-ref ref="FILE"/>
+		</root>
+	</springProfile>
+
+	<!-- テストと本番：画面（標準出力）にだけ出す。本番では CloudWatch Logs に送る（送り方は ZPOP-48 で決める） -->
+	<springProfile name="!dev">
+		<root level="INFO">
+			<appender-ref ref="CONSOLE"/>
+		</root>
+	</springProfile>
+</configuration>

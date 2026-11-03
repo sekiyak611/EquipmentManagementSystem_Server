@@ -1,0 +1,66 @@
+# どの環境でも同じ設定。環境ごとの違いは application-dev.yml・application-test.yml・application-prod.yml に書く。
+# 秘密の値（データベースのパスワードなど）はここに書かない。開発では secret.yml、AWSでは環境変数で渡す（CLAUDE.md 5章）。
+spring:
+  application:
+    name: equipment
+  config:
+    # 秘密の値を書くファイル。backend フォルダに置き、Gitでは管理しない（書き方は secret.example.yml）
+    import: optional:file:./secret.yml
+  profiles:
+    # 何も指定しないで起動したときは開発用の設定にする
+    default: dev
+  jackson:
+    # 日時を日本時間で返す（docs/API設計.md 2.1）
+    time-zone: Asia/Tokyo
+  datasource:
+    hikari:
+      # データベースにつながらないとき、5秒で諦める。
+      # 見張り役は10秒で答えがなければ失敗とみなすので、それより短くする（docs/API設計.md 3.10）
+      connection-timeout: 5000
+  flyway:
+    # テーブルを作るSQLの置き場所（ZPOP-23 で作る）
+    locations: classpath:db/migration
+
+mybatis:
+  configuration:
+    # テーブルの列名（last_confirmed_on）を、Javaの名前（lastConfirmedOn）に自動で合わせる
+    map-underscore-to-camel-case: true
+
+server:
+  servlet:
+    session:
+      cookie:
+        # ログイン状態のクッキーを、画面のプログラムから読めないようにする（docs/API設計.md 2.2）
+        http-only: true
+
+# このシステムの設定値（docs/API設計.md 6章）。読み込み先は common.config.AppProperties
+app:
+  # DMに入れるリンクのもとになるアドレス（環境ごとに上書きする）
+  base-url: http://localhost:8080
+  # 時刻の基準
+  time-zone: Asia/Tokyo
+  # 催促の処理を動かす時刻（秒 分 時 日 月 曜日）
+  reminder-cron: "0 0 9 * * *"
+  # ログインしたままにする期間
+  remember-me-validity: 60d
+  password-link:
+    # パスワード再設定のリンクの有効期限
+    reset-validity: 30m
+    # ロックしたときに送るリンクの有効期限
+    lock-validity: 30m
+    # ユーザ登録のときに送るリンクの有効期限
+    registration-validity: 3d
+    # 同じメールアドレスへの再設定の依頼は、この間隔に1回まで
+    request-interval: 5m
+  # ログインに何回続けて失敗したらロックするか
+  lock-threshold: 5
+  # アップロードするCSVの大きさの上限
+  csv-max-size: 1MB
+  slack:
+    # Slackのボットトークン（秘密。secret.yml か環境変数で渡す）
+    bot-token:
+  # 最初の総務の担当者のメールアドレス（秘密。secret.yml か環境変数で渡す）
+  initial-admin-email:
+  test-support:
+    # テスト用の切り替え（Slackの偽物、送った内容を読み出すAPI）。本番では必ず false（CLAUDE.md 5章）
+    enabled: false
