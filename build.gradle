@@ -1,0 +1,51 @@
+// サーバー（backend）の組み立ての設定。
+// 使う部品と版は CLAUDE.md 3章で人が確かめ済みのものだけ。版を勝手に上げ下げしない。
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.1.2'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'jp.co.highjunk'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Web（REST API）・ログインと権限・入力チェック
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	// データベース：テーブルの作成・変更（Flyway）と読み書き（MyBatis）
+	implementation 'org.springframework.boot:spring-boot-starter-flyway'
+	implementation 'org.flywaydb:flyway-mysql'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.1.0'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// テスト
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// ソースの文字コードはUTF-8（WindowsのPCでも日本語のコメントやメッセージが化けないように）
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	// テストはテスト専用のデータベース（equipment_test）を使う設定で動かす（CLAUDE.md 6章）
+	systemProperty 'spring.profiles.active', 'test'
+	// 同じデータベースを使うので、テストは1つずつ順番に動かす（docs/テスト方針.md 4章）
+	maxParallelForks = 1
+}

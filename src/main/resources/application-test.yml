@@ -1,0 +1,14 @@
+# 自動テスト用の設定（gradlew test のとき）
+spring:
+  datasource:
+    # テスト専用のデータベース。開発用のデータベースでテストしない（CLAUDE.md 6章）
+    url: jdbc:mysql://localhost:3306/equipment_test?connectionTimeZone=%2B09:00&forceConnectionTimeZoneToSession=true&characterEncoding=UTF-8
+  flyway:
+    # テストを始める前に、テーブルを作り直すために消すことを許す（docs/テスト方針.md 4章）。
+    # 本番・開発では許さない（Flywayの初めの設定のまま）
+    clean-disabled: false
+
+app:
+  test-support:
+    enabled: true
+
