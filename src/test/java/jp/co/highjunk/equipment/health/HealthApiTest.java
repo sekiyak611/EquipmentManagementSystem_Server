@@ -16,7 +16,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import jp.co.highjunk.equipment.health.mapper.HealthMapper;
+import jp.co.highjunk.equipment.mapper.health.HealthMapper;
 
 /**
  * A-08 アプリとデータベースが動いているかを答える（docs/API設計.md 3.1）のテスト。

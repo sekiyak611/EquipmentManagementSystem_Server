@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jp.co.highjunk.equipment.common.error.ApiResponse;
-import jp.co.highjunk.equipment.health.dto.HealthResponse;
+import jp.co.highjunk.equipment.dto.health.HealthResponse;
 import jp.co.highjunk.equipment.health.service.HealthService;
 
 /**

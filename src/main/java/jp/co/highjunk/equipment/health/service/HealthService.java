@@ -6,8 +6,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import jp.co.highjunk.equipment.common.error.ServiceUnavailableException;
-import jp.co.highjunk.equipment.health.dto.HealthResponse;
-import jp.co.highjunk.equipment.health.mapper.HealthMapper;
+import jp.co.highjunk.equipment.dto.health.HealthResponse;
+import jp.co.highjunk.equipment.mapper.health.HealthMapper;
 
 /**
  * health 機能の業務のルール（A-08）。
