@@ -16,7 +16,7 @@
 - Gradle のプロジェクト名は、フォルダ名と同じ `EquipmentManagementSystem_Server`（settings.gradle）。Eclipse は、ワークスペースの直下にあるプロジェクトの名前を、フォルダ名と同じにする必要があるため。変えない。
 - 秘密の値（データベースのパスワードなど）は、このフォルダの `secret.yml` に書く（Gitで管理しない。見本は `secret.example.yml`）。
 - 開発のときのログは、このフォルダの `logs/` に出る。
-- 共通の決まりの中の「backend」「backend/」は、このリポジトリのこと。
+- skill の名前の「backend」（backend-impl・backend-test・backend-review）は、このリポジトリの作業に使うもの（共通の決まり 4.4）。
 
 ## 3. よく使うコマンド
 
