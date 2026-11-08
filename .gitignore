@@ -1,2 +1,33 @@
+# Git で管理しないもの（CLAUDE.md 7章、Server の CLAUDE.md 4章）。
+# 公開してはいけないもの・各自のPCだけのもの・作られるものを入れる。足したら CLAUDE.md 4章の表も直す。
+
+# 秘密の値（データベースのパスワード、Slack のトークンなど）。見本は secret.example.yml
+/secret.yml
+
+# 開発のときのログ
+/logs/
+
+# Gradle が作るもの
 /.gradle/
 /build/
+
+# Eclipse が作るもの・各自のPCの設定（PCの場所や個人のフォルダの名前が入る）
+/bin/
+/.settings/
+/.classpath
+/.project
+
+# エディタの各自の設定
+/.vscode/
+/.idea/
+
+# Claude Code が成果物の zip を置く場所
+/output/
+
+# Claude Code の各自の設定（共有する .claude/settings.json は管理する）
+/.claude/settings.local.json
+
+# OS が作るもの
+Thumbs.db
+desktop.ini
+.DS_Store
