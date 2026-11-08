@@ -41,7 +41,10 @@ dependencies {
 // dist がなければ何も取り込まない（開発中は Vite の開発用サーバーで画面を開くため）
 def clientDist = file('../EquipmentManagementSystem_Client/dist')
 tasks.named('processResources') {
-	inputs.dir(clientDist).optional()
+	// dist があるときだけ、入力として登録する（Gradle 9 は、ない場所を入力にすると止まるため）
+	if (clientDist.exists()) {
+		inputs.dir(clientDist)
+	}
 	from(clientDist) {
 		into 'static'
 	}
