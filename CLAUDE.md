@@ -49,6 +49,6 @@ Claude Code が .gitignore に入れる（共通の CLAUDE.md 7章）。公開�
 | bin/ | Eclipse が作るもの |
 | .settings/、.classpath、.project | Eclipse の各自のPCの設定（PCの場所や個人のフォルダの名前が入る） |
 | .vscode/、.idea/ | エディタの各自の設定 |
-| output/ | Claude Code が成果物の zip を置く場所 |
+| output/ | Claude Code の作業記録（作業メモなど）を置く場所 |
 | .claude/settings.local.json | Claude Code の各自の設定（.claude/settings.json は共有するので管理する） |
 | Thumbs.db、desktop.ini、.DS_Store | OS が作るもの |
