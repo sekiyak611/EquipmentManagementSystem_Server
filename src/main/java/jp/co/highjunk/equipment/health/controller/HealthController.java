@@ -22,7 +22,7 @@ public class HealthController {
 
 	/**
 	 * A-08 アプリとデータベースが動いているかを答える。
-	 * 動いていれば 200（data は { "state": "UP" }）。データベースにつながらなければ 503（HealthService が投げる）。
+	 * 動いていれば 200（data は { "state": "UP" }）。データベースにつながらなければ 503（HealthServiceImpl が投げる）。
 	 */
 	@GetMapping("/api/health")
 	public ApiResponse<HealthResponse> health() {
