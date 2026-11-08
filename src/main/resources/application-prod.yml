@@ -1,5 +1,5 @@
 # 本番（AWS）の設定。
-# データベースの接続先やパスワードなどは、環境変数で渡す（例：SPRING_DATASOURCE_URL、SPRING_DATASOURCE_PASSWORD、APP_BASE_URL、APP_SLACK_BOT_TOKEN）。
+# データベースの接続先やパスワードなどは、環境変数で渡す（例：SPRING_DATASOURCE_URL、SPRING_DATASOURCE_PASSWORD、APP_BASE_URL、APP_SLACK_BOT_TOKEN、APP_INITIAL_ADMIN_EMAIL）。
 # パラメータストアから環境変数に入れる方法は、AWSの環境を作るタスク（ZPOP-48）で決める。
 server:
   servlet:
