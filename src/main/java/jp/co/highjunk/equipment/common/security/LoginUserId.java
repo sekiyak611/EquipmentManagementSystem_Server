@@ -2,7 +2,8 @@ package jp.co.highjunk.equipment.common.security;
 
 /**
  * ログインしている人のユーザID（users.id）を持つもの。
- * ログイン（ZPOP-25）で作る「ログインしている人」のクラスに付けると、ログにユーザIDが出る（UserIdLogFilter）。
+ * 「ログインしている人」のクラス（LoginUser）が持つ。ログにユーザIDが出る（UserIdLogFilter）。
+ * ほかの機能の controller では、`@AuthenticationPrincipal LoginUserId user` で受け取る。
  */
 public interface LoginUserId {
 

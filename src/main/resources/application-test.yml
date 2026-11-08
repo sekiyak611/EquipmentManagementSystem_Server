@@ -7,6 +7,8 @@ spring:
     # テストを始める前に、テーブルを作り直すために消すことを許す（docs/テスト方針.md 4章）。
     # 本番・開発では許さない（Flywayの初めの設定のまま）
     clean-disabled: false
+    # テーブル（db/migration）に加えて、開発用のユーザ（db/devdata）を入れる（詳細設計 common.md 4章）。画面のテストでログインに使う
+    locations: classpath:db/migration,classpath:db/devdata
     placeholders:
       # テストのデータベースに入れる、最初の総務の担当者のメールアドレス。本物のアドレスはテストに使わない
       initial_admin_email: admin@example.com

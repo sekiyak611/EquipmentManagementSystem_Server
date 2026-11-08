@@ -10,7 +10,7 @@ import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoCon
  *
  * <p>UserDetailsServiceAutoConfiguration は使わない。使うと、Spring Boot が仮のユーザを作り、
  * そのパスワードをログに出してしまうため（ログにパスワードを出さない決まり。CLAUDE.md 5章）。
- * ログインのユーザの読み込みは ZPOP-25 で作る。
+ * ログイン（auth 機能。ZPOP-55）は UserDetailsService を使わずに作ったので、外したままでよい。
  */
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @ConfigurationPropertiesScan

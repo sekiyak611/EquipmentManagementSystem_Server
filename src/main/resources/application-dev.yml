@@ -4,3 +4,6 @@ spring:
     # 各自のPCのMySQLの、開発用のデータベース。
     # connectionTimeZone：データベースとのやり取りを日本時間（+09:00）にそろえる
     url: jdbc:mysql://localhost:3306/equipment_dev?connectionTimeZone=%2B09:00&forceConnectionTimeZoneToSession=true&characterEncoding=UTF-8
+  flyway:
+    # テーブル（db/migration）に加えて、開発用のユーザ（db/devdata）を入れる（詳細設計 common.md 4章）。本番では入れない
+    locations: classpath:db/migration,classpath:db/devdata

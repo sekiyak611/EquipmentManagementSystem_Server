@@ -160,10 +160,11 @@ class DatabaseMigrationTest {
 		}
 
 		@Test
-		@DisplayName("ユーザは最初の総務の担当者1人。権限は総務、パスワードは空、メールアドレスは設定の値")
+		@DisplayName("最初の総務の担当者がいる。権限は総務、パスワードは空、メールアドレスは設定の値")
 		void initialAdmin() {
 			Map<String, Object> row = jdbc.queryForMap(
-					"SELECT name, email, password_hash, role_id, failed_login_count, version, created_by FROM users");
+					"SELECT name, email, password_hash, role_id, failed_login_count, version, created_by FROM users"
+							+ " WHERE name = '関谷 海仁'");
 
 			assertThat(row.get("name")).isEqualTo("関谷 海仁");
 			// application-test.yml の spring.flyway.placeholders.initial_admin_email
@@ -173,6 +174,19 @@ class DatabaseMigrationTest {
 			assertThat(row.get("failed_login_count")).isEqualTo(0);
 			assertThat(row.get("version")).isEqualTo(0);
 			assertThat(row.get("created_by")).isNull();
+		}
+
+		@Test
+		@DisplayName("テストと開発のときだけ、開発用のユーザ（総務・一般社員）がいて、パスワードがある（common.md 4章）")
+		void devUsers() {
+			List<Map<String, Object>> rows = jdbc.queryForList("""
+					SELECT email, role_id, password_hash FROM users
+					WHERE email IN ('soumu@example.com', 'ippan@example.com') ORDER BY email""");
+
+			assertThat(rows).extracting(r -> r.get("email") + "|" + r.get("role_id")).containsExactly(
+					"ippan@example.com|" + roleId("一般社員"), "soumu@example.com|" + roleId("総務"));
+			assertThat(rows).extracting(r -> (String) r.get("password_hash")).allMatch(h -> h.startsWith("$2a$"));
+			assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM users", Integer.class)).isEqualTo(3);
 		}
 
 		@Test
