@@ -4,6 +4,9 @@
 # 秘密の値（データベースのパスワード、Slack のトークンなど）。見本は secret.example.yml
 /secret.yml
 
+# Docker の MySQL のパスワード（compose.yaml が読む）。見本は .env.example
+/.env
+
 # 開発のときのログ
 /logs/
 

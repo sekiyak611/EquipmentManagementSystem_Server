@@ -22,12 +22,15 @@
 
 **最初に1回だけ**
 
-- MySQL に、開発用（equipment_dev）とテスト用（equipment_test）のデータベースと、アプリ用のユーザを作る（Document の internaldesign/環境構築手順書.md の手順4・5。MySQL は 8.4.13）。
-- `secret.example.yml` をコピーして `secret.yml` を作り、データベースのユーザ名とパスワードを書く。
+- Docker Desktop を入れる（Document の internaldesign/環境構築手順書.md の手順4）。MySQL は PC に入れず、Docker で動かす（共通の決まり 3章）。
+- `.env.example` をコピーして `.env` を作り、MySQL の root とアプリ用のユーザ `equipment` のパスワードを書く。`docker compose up -d` で MySQL（8.4.13）を作って起動する。開発用（equipment_dev）とテスト用（equipment_test）のデータベースと、ユーザ `equipment` は、最初の起動のときに自動でできる（手順書の手順5）。
+- `secret.example.yml` をコピーして `secret.yml` を作り、データベースのユーザ名（`equipment`）と、.env の `MYSQL_PASSWORD` と同じパスワードを書く。
 
 | やること | コマンド（このフォルダで） |
 |---|---|
 | Claude Code を起動する | `claude --add-dir ../EquipmentManagementSystem_Document` |
+| MySQL を起動する・止める | `docker compose up -d`・`docker compose stop`（データは残る。`docker compose down -v` はデータも消すので、人に確かめてから） |
+| MySQL が動いているか確かめる | `docker compose ps`（STATUS が healthy） |
 | サーバーを起動する（開発用の設定） | `.\gradlew.bat bootRun`（Eclipse なら、EquipmentApplication を右クリック →「実行」→「Spring Boot アプリケーション」） |
 | 動いているか確かめる | ブラウザで http://localhost:8080/api/health を開く |
 | サーバーのテスト | `.\gradlew.bat test`（結果は build/reports/tests/test/index.html） |
@@ -44,6 +47,7 @@ Claude Code が .gitignore に入れる（共通の CLAUDE.md 7章）。公開�
 | もの | 理由 |
 |---|---|
 | secret.yml | 秘密の値（パスワード、トークン） |
+| .env | Docker の MySQL のパスワード（compose.yaml が読む） |
 | logs/ | ログ |
 | build/、.gradle/ | Gradle が作るもの |
 | bin/ | Eclipse が作るもの |
