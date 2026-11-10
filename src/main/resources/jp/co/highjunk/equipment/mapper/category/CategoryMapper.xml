@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- category 機能の categories の SQL（詳細設計 category/K-01_種別一覧.md・K-02_種別を追加する.md・K-03_種別を変える.md の7章）。
+<!-- category 機能の categories の SQL（詳細設計 category/K-01_種別一覧.md・K-02_種別を追加する.md・K-03_種別を変える.md・K-04_種別を消す.md の7章）。
      JOIN とサブクエリは使わない。値は #{} で渡す（CLAUDE.md 5章）。 -->
 <mapper namespace="jp.co.highjunk.equipment.mapper.category.CategoryMapper">
 
@@ -17,6 +17,15 @@
 		FROM categories
 		WHERE id = #{id}
 		  AND deleted_at IS NULL
+	</select>
+
+	<!-- K-04：読んだ行を、まとまりが終わるまで押さえる（K-04 の8章） -->
+	<select id="selectByIdForUpdate" resultType="jp.co.highjunk.equipment.category.model.Category">
+		SELECT id, name, initial, version
+		FROM categories
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+		FOR UPDATE
 	</select>
 
 	<select id="countByName" resultType="int">
@@ -55,6 +64,17 @@
 		    updated_by = #{updatedBy}
 		WHERE id = #{id}
 		  AND version = #{version}
+		  AND deleted_at IS NULL
+	</update>
+
+	<!-- 論理削除（データ設計 2章）。消すときも version を1増やす（K-04 の12章の No.1） -->
+	<update id="markDeleted">
+		UPDATE categories
+		SET deleted_at = #{deletedAt},
+		    updated_at = #{deletedAt},
+		    updated_by = #{updatedBy},
+		    version = version + 1
+		WHERE id = #{id}
 		  AND deleted_at IS NULL
 	</update>
 </mapper>

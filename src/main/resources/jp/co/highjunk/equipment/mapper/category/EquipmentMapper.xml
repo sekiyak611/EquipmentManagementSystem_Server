@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- category 機能の equipment の SQL（詳細設計 category/K-01_種別一覧.md・K-03_種別を変える.md の7章）。読むだけ。
+<!-- category 機能の equipment の SQL（詳細設計 category/K-01_種別一覧.md・K-03_種別を変える.md・K-04_種別を消す.md の7章）。読むだけ。
      JOIN とサブクエリは使わない。値は #{} で渡す（CLAUDE.md 5章）。 -->
 <mapper namespace="jp.co.highjunk.equipment.mapper.category.EquipmentMapper">
 
@@ -17,5 +17,14 @@
 		FROM equipment
 		WHERE category_id = #{categoryId}
 		  AND deleted_at IS NULL
+	</select>
+
+	<!-- K-04：確定したばかりの行も数える読み方（FOR SHARE）。K-04 の8章 -->
+	<select id="countByCategoryIdForShare" resultType="long">
+		SELECT COUNT(*)
+		FROM equipment
+		WHERE category_id = #{categoryId}
+		  AND deleted_at IS NULL
+		FOR SHARE
 	</select>
 </mapper>
