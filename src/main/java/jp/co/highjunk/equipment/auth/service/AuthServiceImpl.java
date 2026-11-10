@@ -17,7 +17,10 @@ import jp.co.highjunk.equipment.common.security.LoginUser;
 import jp.co.highjunk.equipment.common.security.LoginUserRefresher;
 import jp.co.highjunk.equipment.dto.auth.LoginRequest;
 import jp.co.highjunk.equipment.dto.auth.MeResponse;
-import jp.co.highjunk.equipment.mapper.auth.AuthMapper;
+import jp.co.highjunk.equipment.mapper.auth.PermissionMapper;
+import jp.co.highjunk.equipment.mapper.auth.RoleMapper;
+import jp.co.highjunk.equipment.mapper.auth.RolePermissionMapper;
+import jp.co.highjunk.equipment.mapper.auth.UserMapper;
 
 /**
  * auth 機能の業務のルールの中身（詳細設計 auth/A-01_ログイン.md・A-03_ログイン中の人の情報.md）。
@@ -28,12 +31,22 @@ public class AuthServiceImpl implements AuthService, LoginUserRefresher {
 
 	private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
-	private final AuthMapper authMapper;
+	private final UserMapper userMapper;
+
+	private final RoleMapper roleMapper;
+
+	private final RolePermissionMapper rolePermissionMapper;
+
+	private final PermissionMapper permissionMapper;
 
 	private final LoginValidator loginValidator;
 
-	public AuthServiceImpl(AuthMapper authMapper, LoginValidator loginValidator) {
-		this.authMapper = authMapper;
+	public AuthServiceImpl(UserMapper userMapper, RoleMapper roleMapper, RolePermissionMapper rolePermissionMapper,
+			PermissionMapper permissionMapper, LoginValidator loginValidator) {
+		this.userMapper = userMapper;
+		this.roleMapper = roleMapper;
+		this.rolePermissionMapper = rolePermissionMapper;
+		this.permissionMapper = permissionMapper;
 		this.loginValidator = loginValidator;
 	}
 
@@ -46,7 +59,7 @@ public class AuthServiceImpl implements AuthService, LoginUserRefresher {
 
 	@Override
 	public MeResponse me(long userId) {
-		User user = authMapper.selectUserById(userId);
+		User user = userMapper.selectById(userId);
 		if (user == null) {
 			throw new UnauthorizedException(ApiMessages.UNAUTHORIZED);
 		}
@@ -59,7 +72,7 @@ public class AuthServiceImpl implements AuthService, LoginUserRefresher {
 	 */
 	@Override
 	public Optional<List<String>> currentPermissions(LoginUser loginUser) {
-		User user = authMapper.selectUserById(loginUser.userId());
+		User user = userMapper.selectById(loginUser.userId());
 		if (user == null) {
 			log.info("削除されたユーザのため、ログアウトさせました（userId={}）", loginUser.userId());
 			return Optional.empty();
@@ -68,16 +81,16 @@ public class AuthServiceImpl implements AuthService, LoginUserRefresher {
 			log.info("パスワードが変わったため、ログアウトさせました（userId={}）", loginUser.userId());
 			return Optional.empty();
 		}
-		return Optional.of(authMapper.selectPermissionCodes(user.getRoleId()));
+		return Optional.of(rolePermissionMapper.selectPermissionCodesByRoleId(user.getRoleId()));
 	}
 
 	private MeResponse toMeResponse(User user) {
-		List<String> codes = authMapper.selectPermissionCodes(user.getRoleId());
-		List<String> permissions = codes.isEmpty() ? List.of() : authMapper.selectSortedPermissionCodes(codes);
+		List<String> codes = rolePermissionMapper.selectPermissionCodesByRoleId(user.getRoleId());
+		List<String> permissions = codes.isEmpty() ? List.of() : permissionMapper.selectSortedCodes(codes);
 		HomePage homePage = permissions.contains(PermissionCode.EQUIPMENT_VIEW.name())
 				? HomePage.EQUIPMENT_LIST
 				: HomePage.MY_EQUIPMENT;
-		return new MeResponse(user.getId(), user.getName(), user.getEmail(), authMapper.selectRoleName(user.getRoleId()),
+		return new MeResponse(user.getId(), user.getName(), user.getEmail(), roleMapper.selectNameById(user.getRoleId()),
 				permissions, homePage);
 	}
 }
