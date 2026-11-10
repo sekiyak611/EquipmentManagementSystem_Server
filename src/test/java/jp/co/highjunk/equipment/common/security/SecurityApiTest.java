@@ -70,11 +70,10 @@ class SecurityApiTest {
 		assertThat(xsrf).as("XSRF-TOKEN クッキーが渡される").isNotNull();
 		assertThat(xsrf.isHttpOnly()).as("画面のプログラムから読めるよう HttpOnly にしない").isFalse();
 
-		// A-01（ログイン）は ZPOP-25 で作るので、今は「見つからない（404）」になる。
-		// 合言葉が通らなければ 403 になるので、403 にならないことを確かめる
+		// 合言葉が通らなければ 403 になる。通れば A-01（ログイン）の入力チェックまで進み、空の値なので 400 になる
 		mockMvc.perform(post("/api/auth/login").cookie(xsrf).header("X-XSRF-TOKEN", xsrf.getValue())
 				.contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isNotFound());
+				.andExpect(status().isBadRequest());
 	}
 
 	@Test
