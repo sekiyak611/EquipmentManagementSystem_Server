@@ -1,7 +1,9 @@
 package jp.co.highjunk.equipment.category.model;
 
+import java.time.LocalDateTime;
+
 /**
- * categories（種別）の1行。K-01 で使う列だけを持つ（データ設計 5.5）。
+ * categories（種別）の1行。K-01・K-02 で使う列だけを持つ（データ設計 5.5・2章）。
  */
 public class Category {
 
@@ -15,6 +17,18 @@ public class Category {
 
 	/** 楽観ロックの番号（データ設計 2章） */
 	private int version;
+
+	/** 作った日時（日本時間） */
+	private LocalDateTime createdAt;
+
+	/** 作った人のユーザID */
+	private Long createdBy;
+
+	/** 最後に変えた日時（日本時間） */
+	private LocalDateTime updatedAt;
+
+	/** 最後に変えた人のユーザID */
+	private Long updatedBy;
 
 	public long getId() {
 		return id;
@@ -46,5 +60,37 @@ public class Category {
 
 	public void setVersion(int version) {
 		this.version = version;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Long getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(Long createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public Long getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(Long updatedBy) {
+		this.updatedBy = updatedBy;
 	}
 }
