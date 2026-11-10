@@ -20,4 +20,10 @@ public interface EquipmentMapper {
 
 	/** 1つの種別の、削除されていない備品の数（管理状態は問わない）。 */
 	long countByCategoryId(@Param("categoryId") long categoryId);
+
+	/**
+	 * 1つの種別の、削除されていない備品の数。ほかの人が確定させたばかりの行も数え、数えた行を押さえる（FOR SHARE）。
+	 * K-04 で、使っている備品がないかを確かめるため（K-04 の8章）。
+	 */
+	long countByCategoryIdForShare(@Param("categoryId") long categoryId);
 }

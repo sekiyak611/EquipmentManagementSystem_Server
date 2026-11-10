@@ -1,5 +1,6 @@
 package jp.co.highjunk.equipment.mapper.category;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -8,7 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import jp.co.highjunk.equipment.category.model.Category;
 
 /**
- * category 機能の categories テーブルの読み書き（詳細設計 category/category.md 2.1、K-01〜K-03 の7章）。
+ * category 機能の categories テーブルの読み書き（詳細設計 category/category.md 2.1、K-01〜K-04 の7章）。
  * SQL は src/main/resources の同じパッケージの場所の CategoryMapper.xml に書く。
  */
 @Mapper
@@ -19,6 +20,12 @@ public interface CategoryMapper {
 
 	/** 削除されていない種別を ID で読む。なければ null。 */
 	Category selectById(@Param("id") long id);
+
+	/**
+	 * 削除されていない種別を ID で読み、まとまり（トランザクション）が終わるまで、その行をほかの人が変えられないように押さえる（FOR UPDATE）。
+	 * なければ null。K-04 で、確かめから消すまでの間に備品を足されないようにするため（K-04 の8章）。
+	 */
+	Category selectByIdForUpdate(@Param("id") long id);
 
 	/**
 	 * 削除されていない種別のうち、名前が同じものの数（照合順序 utf8mb4_ja_0900_as_cs_ks で比べる）。
@@ -43,4 +50,12 @@ public interface CategoryMapper {
 	 * @throws org.springframework.dao.DuplicateKeyException 名前・頭文字が、削除されていないほかの種別と重なるとき
 	 */
 	int update(Category category);
+
+	/**
+	 * 種別を論理削除する（deleted_at に日時を入れ、version を1増やす）。削除されていない行だけを変える。
+	 *
+	 * @return 変えた件数（0 なら、ない・削除済み）
+	 */
+	int markDeleted(@Param("id") long id, @Param("deletedAt") LocalDateTime deletedAt,
+			@Param("updatedBy") long updatedBy);
 }
