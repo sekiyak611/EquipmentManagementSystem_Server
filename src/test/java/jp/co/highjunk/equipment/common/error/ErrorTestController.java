@@ -37,6 +37,12 @@ class ErrorTestController {
 		throw new BusinessRuleException("貸出中の備品は削除できません");
 	}
 
+	@GetMapping("/api/test-errors/field-error")
+	ApiResponse<Void> fieldError() {
+		throw new FieldErrorException(List.of(ErrorItem.ofField("name", "この名前はすでに使われています"),
+				ErrorItem.ofField("initial", "この頭文字はすでに使われています")));
+	}
+
 	@GetMapping("/api/test-errors/not-found")
 	ApiResponse<Void> notFound() {
 		throw new NotFoundException();

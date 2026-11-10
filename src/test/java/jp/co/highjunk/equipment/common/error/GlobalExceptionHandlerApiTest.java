@@ -115,6 +115,23 @@ class GlobalExceptionHandlerApiTest {
 	}
 
 	@Test
+	@DisplayName("業務チェックの入力欄のエラー（FieldErrorException）：400。入力の誤りと同じ文で、errors に入力欄ごとの文。data は null。行番号・管理番号の項目は出さない")
+	void fieldError() throws Exception {
+		mockMvc.perform(get("/api/test-errors/field-error"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.status").value(400))
+				.andExpect(jsonPath("$.message").value("入力内容に誤りがあります。"))
+				.andExpect(jsonPath("$.data").value(org.hamcrest.Matchers.nullValue()))
+				.andExpect(jsonPath("$.errors.length()").value(2))
+				.andExpect(jsonPath("$.errors[0].field").value("name"))
+				.andExpect(jsonPath("$.errors[0].message").value("この名前はすでに使われています"))
+				.andExpect(jsonPath("$.errors[0].row").doesNotExist())
+				.andExpect(jsonPath("$.errors[0].managementNo").doesNotExist())
+				.andExpect(jsonPath("$.errors[1].field").value("initial"))
+				.andExpect(jsonPath("$.errors[1].message").value("この頭文字はすでに使われています"));
+	}
+
+	@Test
 	@DisplayName("CSVの行のエラー：400。errors に行番号・管理番号・理由")
 	void csvError() throws Exception {
 		mockMvc.perform(get("/api/test-errors/csv"))
