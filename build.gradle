@@ -37,6 +37,19 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// 隣の Client で組み立てた画面（npm run build の結果）を、static フォルダとして取り込む（詳細設計 common.md 3.9）。
+// dist がなければ何も取り込まない（開発中は Vite の開発用サーバーで画面を開くため）
+def clientDist = file('../EquipmentManagementSystem_Client/dist')
+tasks.named('processResources') {
+	// dist があるときだけ、入力として登録する（Gradle 9 は、ない場所を入力にすると止まるため）
+	if (clientDist.exists()) {
+		inputs.dir(clientDist)
+	}
+	from(clientDist) {
+		into 'static'
+	}
+}
+
 // ソースの文字コードはUTF-8（WindowsのPCでも日本語のコメントやメッセージが化けないように）
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
