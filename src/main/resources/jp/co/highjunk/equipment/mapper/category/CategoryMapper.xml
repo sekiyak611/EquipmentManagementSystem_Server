@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- category 機能の categories の SQL（詳細設計 category/K-01_種別一覧.md の7章）。
+     JOIN とサブクエリは使わない。値は #{} で渡す（CLAUDE.md 5章）。 -->
+<mapper namespace="jp.co.highjunk.equipment.mapper.category.CategoryMapper">
+
+	<!-- initial IS NULL は、頭文字がある行が 0、ない行が 1 になるので、頭文字のある種別が先に来る（画面設計 16章） -->
+	<select id="selectAll" resultType="jp.co.highjunk.equipment.category.model.Category">
+		SELECT id, name, initial, version
+		FROM categories
+		WHERE deleted_at IS NULL
+		ORDER BY initial IS NULL, initial, name
+	</select>
+</mapper>
