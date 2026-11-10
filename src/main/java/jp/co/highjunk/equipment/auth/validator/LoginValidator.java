@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import jp.co.highjunk.equipment.auth.model.User;
 import jp.co.highjunk.equipment.common.error.UnauthorizedException;
-import jp.co.highjunk.equipment.mapper.auth.AuthMapper;
+import jp.co.highjunk.equipment.mapper.auth.UserMapper;
 
 /**
  * A-01 の業務チェック：メールアドレスとパスワードを確かめる（詳細設計 auth/A-01_ログイン.md 4・5章）。
@@ -24,7 +24,7 @@ public class LoginValidator {
 
 	private static final Logger log = LoggerFactory.getLogger(LoginValidator.class);
 
-	private final AuthMapper authMapper;
+	private final UserMapper userMapper;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -34,8 +34,8 @@ public class LoginValidator {
 	 */
 	private final String dummyHash;
 
-	public LoginValidator(AuthMapper authMapper, PasswordEncoder passwordEncoder) {
-		this.authMapper = authMapper;
+	public LoginValidator(UserMapper userMapper, PasswordEncoder passwordEncoder) {
+		this.userMapper = userMapper;
 		this.passwordEncoder = passwordEncoder;
 		this.dummyHash = passwordEncoder.encode(UUID.randomUUID().toString());
 	}
@@ -47,7 +47,7 @@ public class LoginValidator {
 	 * @throws UnauthorizedException 登録がない・削除された、パスワードがまだない・違う、ロック中のとき（どれも同じ文）
 	 */
 	public User validate(String email, String password) {
-		User user = authMapper.selectUserByEmail(email.toLowerCase(Locale.ROOT));
+		User user = userMapper.selectByEmail(email.toLowerCase(Locale.ROOT));
 		if (user == null || user.getPasswordHash() == null) {
 			passwordEncoder.matches(password, dummyHash);
 			log.warn("ログインできませんでした（{}）", user == null ? "登録のないメールアドレス" : "パスワードがまだない userId=" + user.getId());

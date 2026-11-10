@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- auth 機能の users の SQL（詳細設計 auth/A-01_ログイン.md・A-03_ログイン中の人の情報.md の7章）。
+     JOIN とサブクエリは使わない。値は #{} で渡す（CLAUDE.md 5章）。 -->
+<mapper namespace="jp.co.highjunk.equipment.mapper.auth.UserMapper">
+
+	<sql id="columns">
+		id, name, email, password_hash, role_id, locked_at, session_valid_after
+	</sql>
+
+	<select id="selectByEmail" resultType="jp.co.highjunk.equipment.auth.model.User">
+		SELECT <include refid="columns" />
+		FROM users
+		WHERE email = #{email}
+		  AND deleted_at IS NULL
+	</select>
+
+	<select id="selectById" resultType="jp.co.highjunk.equipment.auth.model.User">
+		SELECT <include refid="columns" />
+		FROM users
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+	</select>
+</mapper>
