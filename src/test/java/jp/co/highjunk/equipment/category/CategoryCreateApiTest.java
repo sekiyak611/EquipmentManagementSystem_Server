@@ -2,7 +2,6 @@ package jp.co.highjunk.equipment.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.nullValue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,44 +13,22 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
 import jp.co.highjunk.equipment.category.validator.CategoryValidator;
-import jp.co.highjunk.equipment.common.security.LoginUser;
 import jp.co.highjunk.equipment.testsupport.CsrfTestHelper;
 
 /**
  * K-02 種別を追加する（docs/API設計.md 3.6、詳細設計 category/K-02_種別を追加する.md）のテスト。
- * ログインは、開発用のユーザ（common.md 4章）の LoginUser を入れて行う。権限項目は、APIを呼ぶたびにデータベースから読み直される
- * （総務 soumu@example.com は CATEGORY_MANAGE を持ち、一般社員 ippan@example.com は持たない）。
- * 最初のデータ（V2）に、種別が6つ（A：PC、B：ヘッドセット、C：マウス、D：カメラ、E：モニター、F：アダプタ）ある。
- * 書き込みは、テストが終わるたびに元に戻す（@Transactional。docs/テスト方針.md 4章）。
+ * ログインのしかたと最初のデータは CategoryApiTestBase。
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
 @DisplayName("K-02 種別を追加する")
-class CategoryCreateApiTest {
-
-	static final String SOUMU = "soumu@example.com";
-
-	static final String IPPAN = "ippan@example.com";
-
-	@Autowired
-	MockMvc mockMvc;
-
-	@Autowired
-	JdbcTemplate jdbc;
+class CategoryCreateApiTest extends CategoryApiTestBase {
 
 	@Test
 	@DisplayName("総務：201。data に作った種別（K-01 の1件と同じ形。使っている備品の数は 0、version は 0）。データベースに、作った人・日時が入る")
@@ -266,19 +243,5 @@ class CategoryCreateApiTest {
 				.with(CsrfTestHelper.csrfToken(mockMvc))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(json));
-	}
-
-	/** 開発用のユーザでログインした状態にする（権限項目は、APIを呼ぶたびにデータベースから読み直される）。 */
-	RequestPostProcessor login(String email) {
-		LoginUser loginUser = new LoginUser(userId(email), LocalDateTime.now());
-		return authentication(new UsernamePasswordAuthenticationToken(loginUser, null, List.of()));
-	}
-
-	long userId(String email) {
-		return jdbc.queryForObject("SELECT id FROM users WHERE email = ?", Long.class, email);
-	}
-
-	int countCategories() {
-		return jdbc.queryForObject("SELECT COUNT(*) FROM categories", Integer.class);
 	}
 }

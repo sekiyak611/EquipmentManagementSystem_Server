@@ -3,6 +3,7 @@ package jp.co.highjunk.equipment.mapper.category;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import jp.co.highjunk.equipment.category.model.CategoryEquipmentCount;
 
@@ -16,4 +17,7 @@ public interface EquipmentMapper {
 
 	/** 削除されていない備品の数を、種別ごとに数える。備品のない種別は結果に出ない。 */
 	List<CategoryEquipmentCount> countGroupByCategoryId();
+
+	/** 1つの種別の、削除されていない備品の数（管理状態は問わない）。 */
+	long countByCategoryId(@Param("categoryId") long categoryId);
 }

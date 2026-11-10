@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- category 機能の categories の SQL（詳細設計 category/K-01_種別一覧.md・K-02_種別を追加する.md の7章）。
+<!-- category 機能の categories の SQL（詳細設計 category/K-01_種別一覧.md・K-02_種別を追加する.md・K-03_種別を変える.md の7章）。
      JOIN とサブクエリは使わない。値は #{} で渡す（CLAUDE.md 5章）。 -->
 <mapper namespace="jp.co.highjunk.equipment.mapper.category.CategoryMapper">
 
@@ -12,11 +12,21 @@
 		ORDER BY initial IS NULL, initial, name
 	</select>
 
+	<select id="selectById" resultType="jp.co.highjunk.equipment.category.model.Category">
+		SELECT id, name, initial, version
+		FROM categories
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+	</select>
+
 	<select id="countByName" resultType="int">
 		SELECT COUNT(*)
 		FROM categories
 		WHERE name = #{name}
 		  AND deleted_at IS NULL
+		<if test="excludeId != null">
+		  AND id &lt;&gt; #{excludeId}
+		</if>
 	</select>
 
 	<select id="countByInitial" resultType="int">
@@ -24,6 +34,9 @@
 		FROM categories
 		WHERE initial = #{initial}
 		  AND deleted_at IS NULL
+		<if test="excludeId != null">
+		  AND id &lt;&gt; #{excludeId}
+		</if>
 	</select>
 
 	<!-- name_active・initial_active は生成列なので入れない。version は初期値の 0 -->
@@ -31,4 +44,17 @@
 		INSERT INTO categories (name, initial, created_at, created_by, updated_at, updated_by)
 		VALUES (#{name}, #{initial}, #{createdAt}, #{createdBy}, #{updatedAt}, #{updatedBy})
 	</insert>
+
+	<!-- 楽観ロック：画面を開いたときの version と同じ行だけを変え、version を1増やす（データ設計 2章） -->
+	<update id="update">
+		UPDATE categories
+		SET name = #{name},
+		    initial = #{initial},
+		    version = version + 1,
+		    updated_at = #{updatedAt},
+		    updated_by = #{updatedBy}
+		WHERE id = #{id}
+		  AND version = #{version}
+		  AND deleted_at IS NULL
+	</update>
 </mapper>
