@@ -18,8 +18,13 @@ spring:
       # 見張り役は10秒で答えがなければ失敗とみなすので、それより短くする（docs/API設計.md 3.10）
       connection-timeout: 5000
   flyway:
-    # テーブルを作るSQLの置き場所（ZPOP-23 で作る）
+    # テーブルを作るSQLの置き場所（ZPOP-122。詳細設計 テーブル.md）
     locations: classpath:db/migration
+    placeholders:
+      # 最初の総務の担当者のメールアドレスを、最初のデータの SQL（V2）に渡す（docs/データ設計.md 7章）。
+      # 値は app.initial-admin-email（秘密。secret.yml か環境変数 APP_INITIAL_ADMIN_EMAIL）。
+      # 初めて当てるときに空か形が正しくないと、当て始める前に止まり、起動しない（common.config.InitialAdminEmailCallback）
+      initial_admin_email: ${app.initial-admin-email:}
 
 mybatis:
   configuration:
