@@ -1,26 +1,19 @@
 package jp.co.highjunk.equipment.equipment.service;
 
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import jp.co.highjunk.equipment.common.calendar.MonthlyConfirmationRule;
-import jp.co.highjunk.equipment.common.constant.LoanStatus;
 import jp.co.highjunk.equipment.common.constant.LoanStatusFilter;
-import jp.co.highjunk.equipment.dto.equipment.EquipmentListItem;
 import jp.co.highjunk.equipment.dto.equipment.EquipmentListRequest;
 import jp.co.highjunk.equipment.dto.equipment.EquipmentListResponse;
-import jp.co.highjunk.equipment.equipment.model.Category;
 import jp.co.highjunk.equipment.equipment.model.Equipment;
 import jp.co.highjunk.equipment.equipment.model.EquipmentSearchCondition;
 import jp.co.highjunk.equipment.equipment.model.Loan;
-import jp.co.highjunk.equipment.equipment.model.User;
-import jp.co.highjunk.equipment.mapper.equipment.CategoryMapper;
 import jp.co.highjunk.equipment.mapper.equipment.EquipmentMapper;
 import jp.co.highjunk.equipment.mapper.equipment.LoanMapper;
 import jp.co.highjunk.equipment.mapper.equipment.UserMapper;
@@ -28,7 +21,7 @@ import jp.co.highjunk.equipment.mapper.equipment.UserMapper;
 /**
  * C-01 備品を探すの業務のルールの中身（詳細設計 equipment/C-01_備品を探す.md の4・5・7章）。
  * JOIN とサブクエリを使わず、貸出中の貸出履歴と、氏名で探したユーザを先に読んで備品のIDの一覧にし、備品の SQL の IN に渡す。
- * 種別の名前と借用者の氏名は、ページの備品を読んだあとで IN でまとめて読み、Java で突き合わせる（CLAUDE.md 5章）。
+ * 種別の名前と借用者の氏名は、ページの備品を読んだあとで EquipmentItemAssembler が IN でまとめて読み、Java で突き合わせる（CLAUDE.md 5章）。
  * 読むだけなので @Transactional は付けない（8章）。
  */
 @Service
@@ -41,19 +34,19 @@ public class EquipmentListServiceImpl implements EquipmentListService {
 
 	private final LoanMapper loanMapper;
 
-	private final CategoryMapper categoryMapper;
-
 	private final UserMapper userMapper;
 
 	private final MonthlyConfirmationRule monthlyConfirmationRule;
 
-	public EquipmentListServiceImpl(EquipmentMapper equipmentMapper, LoanMapper loanMapper,
-			CategoryMapper categoryMapper, UserMapper userMapper, MonthlyConfirmationRule monthlyConfirmationRule) {
+	private final EquipmentItemAssembler equipmentItemAssembler;
+
+	public EquipmentListServiceImpl(EquipmentMapper equipmentMapper, LoanMapper loanMapper, UserMapper userMapper,
+			MonthlyConfirmationRule monthlyConfirmationRule, EquipmentItemAssembler equipmentItemAssembler) {
 		this.equipmentMapper = equipmentMapper;
 		this.loanMapper = loanMapper;
-		this.categoryMapper = categoryMapper;
 		this.userMapper = userMapper;
 		this.monthlyConfirmationRule = monthlyConfirmationRule;
+		this.equipmentItemAssembler = equipmentItemAssembler;
 	}
 
 	@Override
@@ -99,34 +92,8 @@ public class EquipmentListServiceImpl implements EquipmentListService {
 		long totalCount = equipmentMapper.countBySearch(condition);
 		int totalPages = (int) ((totalCount + PAGE_SIZE - 1) / PAGE_SIZE);
 		List<Equipment> rows = totalCount == 0 ? List.of() : equipmentMapper.selectBySearch(condition);
-		return new EquipmentListResponse(toItems(rows, borrowerByEquipment), request.page(), PAGE_SIZE, totalCount,
+		return new EquipmentListResponse(equipmentItemAssembler.toItems(rows, borrowerByEquipment), request.page(), PAGE_SIZE, totalCount,
 				totalPages);
-	}
-
-	/** ページの備品に、種別の名前と借用者の氏名を突き合わせる。どちらも IN でまとめて1回で読む（N+1 を防ぐ） */
-	private List<EquipmentListItem> toItems(List<Equipment> rows, Map<Long, Long> borrowerByEquipment) {
-		if (rows.isEmpty()) {
-			return List.of();
-		}
-		Set<Long> categoryIds = rows.stream().map(Equipment::getCategoryId)
-				.collect(Collectors.toCollection(LinkedHashSet::new));
-		Map<Long, String> categoryNames = categoryMapper.selectByIds(categoryIds).stream()
-				.collect(Collectors.toMap(Category::getId, Category::getName));
-
-		Set<Long> userIds = rows.stream().map(row -> borrowerByEquipment.get(row.getId()))
-				.filter(id -> id != null)
-				.collect(Collectors.toCollection(LinkedHashSet::new));
-		Map<Long, String> userNames = userIds.isEmpty() ? Map.of()
-				: userMapper.selectByIds(userIds).stream().collect(Collectors.toMap(User::getId, User::getName));
-
-		return rows.stream().map(row -> {
-			Long borrowerId = borrowerByEquipment.get(row.getId());
-			return new EquipmentListItem(row.getId(), row.getManagementNo(), categoryNames.get(row.getCategoryId()),
-					row.getMaker(), row.getModel(), row.getStatus(),
-					borrowerId == null ? LoanStatus.IN_STOCK : LoanStatus.LENT,
-					borrowerId == null ? null : userNames.get(borrowerId), row.getLastConfirmedOn(),
-					monthlyConfirmationRule.isConfirmedThisMonth(row.getLastConfirmedOn()));
-		}).toList();
 	}
 
 	/** LIKE の特別な文字（% と _）と、印にする ! の前に ! を付けて、ふつうの文字として探す（C-01 の12章 No.6） */
