@@ -72,4 +72,21 @@
 		</choose>
 		LIMIT #{limit} OFFSET #{offset}
 	</select>
+	<!-- C-03：管理番号の重なり。削除済みの備品の番号は使い直せる（画面設計 12章） -->
+	<select id="countByManagementNo" resultType="long">
+		SELECT COUNT(*)
+		FROM equipment
+		WHERE management_no = #{managementNo}
+		  AND deleted_at IS NULL
+	</select>
+
+	<!-- C-03：管理状態・最終確認日・記録用の列は ServiceImpl が決めた値を入れる。version は最初の値（0） -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO equipment (management_no, category_id, maker, model, serial_no, size, resolution,
+		                       height_adjustable, pivot, purchased_on, warranty_until, status, last_confirmed_on, note,
+		                       created_at, created_by, updated_at, updated_by)
+		VALUES (#{managementNo}, #{categoryId}, #{maker}, #{model}, #{serialNo}, #{size}, #{resolution},
+		        #{heightAdjustable}, #{pivot}, #{purchasedOn}, #{warrantyUntil}, #{status}, #{lastConfirmedOn}, #{note},
+		        #{createdAt}, #{createdBy}, #{updatedAt}, #{updatedBy})
+	</insert>
 </mapper>

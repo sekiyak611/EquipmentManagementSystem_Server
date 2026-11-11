@@ -10,4 +10,12 @@
 		WHERE id IN
 		<foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
 	</select>
+	<!-- C-03：K-04 の FOR UPDATE と押さえ合うので、確かめてから足すまでの間に種別を消されない（category.md 3章の No.2） -->
+	<select id="selectByIdForShare" resultType="jp.co.highjunk.equipment.equipment.model.Category">
+		SELECT id, name
+		FROM categories
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+		FOR SHARE
+	</select>
 </mapper>
