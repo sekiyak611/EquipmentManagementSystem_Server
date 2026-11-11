@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- equipment 機能の users の SQL（詳細設計 equipment/C-01_備品を探す.md の7章）。読むだけ。
+     大文字・小文字を区別せずに探すため、氏名を小文字にそろえて比べる（データ設計 2章）。 -->
+<mapper namespace="jp.co.highjunk.equipment.mapper.equipment.UserMapper">
+
+	<select id="selectIdsByNameContaining" resultType="long">
+		SELECT id
+		FROM users
+		WHERE LOWER(name) LIKE #{keywordPattern} ESCAPE '!'
+	</select>
+
+	<select id="selectByIds" resultType="jp.co.highjunk.equipment.equipment.model.User">
+		SELECT id, name
+		FROM users
+		WHERE id IN
+		<foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+	</select>
+</mapper>
