@@ -1,5 +1,7 @@
 package jp.co.highjunk.equipment.mapper.equipment;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -27,4 +29,14 @@ public interface EquipmentMapper {
 
 	/** 備品を1つ足す。足した行の ID を equipment の id に入れる（C-03 の7章 No.3）。 */
 	void insert(Equipment equipment);
+
+	/**
+	 * 削除されていない備品を1つ読み、行を押さえる（FOR UPDATE）。確かめてから書き換えるまでの間に、ほかの人に変えられないようにする
+	 * （C-06 の8章）。ない・削除済みなら null。
+	 */
+	Equipment selectByIdForUpdate(@Param("id") long id);
+
+	/** 最終確認日を変え、version を1増やす（C-06 の7章 No.3。データ設計 2章）。変えた行の数を返す。 */
+	int updateLastConfirmedOn(@Param("id") long id, @Param("lastConfirmedOn") LocalDate lastConfirmedOn,
+			@Param("updatedAt") LocalDateTime updatedAt, @Param("updatedBy") long updatedBy);
 }

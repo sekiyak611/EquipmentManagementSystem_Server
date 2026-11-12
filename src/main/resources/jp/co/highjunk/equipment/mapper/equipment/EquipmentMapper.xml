@@ -89,4 +89,23 @@
 		        #{heightAdjustable}, #{pivot}, #{purchasedOn}, #{warrantyUntil}, #{status}, #{lastConfirmedOn}, #{note},
 		        #{createdAt}, #{createdBy}, #{updatedAt}, #{updatedBy})
 	</insert>
+	<!-- C-06：確かめてから書き換えるまで、行を押さえる -->
+	<select id="selectByIdForUpdate" resultType="jp.co.highjunk.equipment.equipment.model.Equipment">
+		SELECT id, management_no, category_id, maker, model, status, last_confirmed_on, version
+		FROM equipment
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+		FOR UPDATE
+	</select>
+
+	<!-- C-06：最終確認日だけを変える。保存のたびに version を1増やす（データ設計 2章。2026-11-11 に人が決めた） -->
+	<update id="updateLastConfirmedOn">
+		UPDATE equipment
+		SET last_confirmed_on = #{lastConfirmedOn},
+		    version = version + 1,
+		    updated_at = #{updatedAt},
+		    updated_by = #{updatedBy}
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+	</update>
 </mapper>
