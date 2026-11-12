@@ -3,6 +3,7 @@ package jp.co.highjunk.equipment.mapper.equipment;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import jp.co.highjunk.equipment.equipment.model.Equipment;
 import jp.co.highjunk.equipment.equipment.model.EquipmentSearchCondition;
@@ -20,4 +21,10 @@ public interface EquipmentMapper {
 
 	/** 条件に合う、削除されていない備品を、並び順で limit 件まで読む（C-01 の7章 No.4）。 */
 	List<Equipment> selectBySearch(EquipmentSearchCondition condition);
+
+	/** 削除されていない備品で、管理番号が同じものの数（C-03 の7章 No.2）。 */
+	long countByManagementNo(@Param("managementNo") String managementNo);
+
+	/** 備品を1つ足す。足した行の ID を equipment の id に入れる（C-03 の7章 No.3）。 */
+	void insert(Equipment equipment);
 }
