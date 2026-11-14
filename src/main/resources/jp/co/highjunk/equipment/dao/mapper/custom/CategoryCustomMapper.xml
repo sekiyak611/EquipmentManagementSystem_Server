@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- categories の、手で書く SQL（CLAUDE.md 4.1・5章）。JOIN とサブクエリは使わない。値は #{} で渡す。 -->
+<mapper namespace="jp.co.highjunk.equipment.dao.mapper.custom.CategoryCustomMapper">
+
+	<!-- K-04：読んだ行を、まとまりが終わるまで押さえる（K-04 の8章） -->
+	<select id="selectByIdForUpdate" resultType="jp.co.highjunk.equipment.dao.entity.Category">
+		SELECT id, name, initial, deleted_at, version, created_at, created_by, updated_at, updated_by
+		FROM categories
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+		FOR UPDATE
+	</select>
+</mapper>
