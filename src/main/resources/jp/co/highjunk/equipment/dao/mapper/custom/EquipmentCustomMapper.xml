@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- equipment の、手で書く SQL（読むだけ。CLAUDE.md 4.1・5章）。JOIN とサブクエリは使わない。値は #{} で渡す。 -->
+<mapper namespace="jp.co.highjunk.equipment.dao.mapper.custom.EquipmentCustomMapper">
+
+	<!-- 管理状態（status）は問わない。廃棄・不明の備品も数える（画面設計 16章「削除されていない備品」） -->
+	<select id="countGroupByCategoryId" resultType="jp.co.highjunk.equipment.dao.entity.custom.CategoryEquipmentCount">
+		SELECT category_id, COUNT(*) AS equipment_count
+		FROM equipment
+		WHERE deleted_at IS NULL
+		GROUP BY category_id
+	</select>
+
+	<!-- K-04：確定したばかりの行も数える読み方（FOR SHARE）。K-04 の8章 -->
+	<select id="countByCategoryIdForShare" resultType="long">
+		SELECT COUNT(*)
+		FROM equipment
+		WHERE category_id = #{categoryId}
+		  AND deleted_at IS NULL
+		FOR SHARE
+	</select>
+</mapper>

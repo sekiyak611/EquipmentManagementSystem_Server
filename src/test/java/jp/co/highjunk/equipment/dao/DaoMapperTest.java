@@ -41,7 +41,7 @@ class DaoMapperTest {
 	@DisplayName("古い mapper と同じ名前でも、パッケージ込みの名前で両方とも見つけられる")
 	void beansAreFoundWithOldMappers() {
 		assertThat(context.containsBean("jp.co.highjunk.equipment.dao.mapper.CategoryMapper")).isTrue();
-		assertThat(context.containsBean("jp.co.highjunk.equipment.mapper.category.CategoryMapper")).isTrue();
+		assertThat(context.containsBean("jp.co.highjunk.equipment.mapper.equipment.CategoryMapper")).isTrue();
 	}
 
 	@Test
