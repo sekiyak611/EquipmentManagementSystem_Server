@@ -31,4 +31,10 @@ public @interface CategoryExists {
 	 * K-04 で、確かめから消すまでの間に、その種別の備品を足されないようにするため。
 	 */
 	boolean forUpdate() default false;
+
+	/**
+	 * true なら、読んだ種別の行を、まとまり（トランザクション）が終わるまで、消されないように押さえる（FOR SHARE）。
+	 * C-03 で、確かめてから備品を足すまでの間に、K-04 でその種別を消されないようにするため。
+	 */
+	boolean forShare() default false;
 }

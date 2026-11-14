@@ -11,4 +11,13 @@
 		  AND deleted_at IS NULL
 		FOR UPDATE
 	</select>
+
+	<!-- C-03：K-04 の FOR UPDATE と押さえ合うので、確かめてから足すまでの間に種別を消されない（category.md 3章の No.2） -->
+	<select id="selectByIdForShare" resultType="jp.co.highjunk.equipment.dao.entity.Category">
+		SELECT id, name, initial, deleted_at, version, created_at, created_by, updated_at, updated_by
+		FROM categories
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+		FOR SHARE
+	</select>
 </mapper>

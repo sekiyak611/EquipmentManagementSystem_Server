@@ -18,4 +18,10 @@ public interface CategoryCustomMapper {
 	 * Example では FOR UPDATE を書けないので、手で書く。
 	 */
 	Category selectByIdForUpdate(@Param("id") long id);
+
+	/**
+	 * 削除されていない種別を ID で読み、行を押さえる（FOR SHARE）。備品を足すとき（C-03）、K-04 で同じ種別を同時に消されないようにする
+	 * （詳細設計 equipment/category/category.md 3章の No.2）。ない・削除済みなら null。
+	 */
+	Category selectByIdForShare(@Param("id") long id);
 }

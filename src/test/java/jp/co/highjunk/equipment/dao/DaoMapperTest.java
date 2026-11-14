@@ -38,10 +38,10 @@ class DaoMapperTest {
 	PermissionMapper permissionMapper;
 
 	@Test
-	@DisplayName("古い mapper と同じ名前でも、パッケージ込みの名前で両方とも見つけられる")
-	void beansAreFoundWithOldMappers() {
+	@DisplayName("自動で作った Mapper も、手で書く Mapper も、パッケージ込みの名前で見つけられる")
+	void beansAreFound() {
 		assertThat(context.containsBean("jp.co.highjunk.equipment.dao.mapper.CategoryMapper")).isTrue();
-		assertThat(context.containsBean("jp.co.highjunk.equipment.mapper.equipment.CategoryMapper")).isTrue();
+		assertThat(context.containsBean("jp.co.highjunk.equipment.dao.mapper.custom.CategoryCustomMapper")).isTrue();
 	}
 
 	@Test
