@@ -4,7 +4,7 @@
 # 秘密の値（データベースのパスワード、Slack のトークンなど）。見本は secret.example.yml
 /secret.yml
 
-# Docker の MySQL のパスワード（compose.yaml が読む）。見本は .env.example
+# 以前の Docker の手順（2026-11-09〜11-14）で使っていたファイル。もう使わないが、PC に残っていても Git に入れない
 /.env
 
 # 開発のときのログ

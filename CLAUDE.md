@@ -22,15 +22,15 @@
 
 **最初に1回だけ**
 
-- Docker Desktop を入れる（Document の internaldesign/環境構築手順書.md の手順4）。MySQL は PC に入れず、Docker で動かす（共通の決まり 3章）。
-- `.env.example` をコピーして `.env` を作り、MySQL の root とアプリ用のユーザ `equipment` のパスワードを書く。`docker compose up -d` で MySQL（8.4.13）を作って起動する。開発用（equipment_dev）とテスト用（equipment_test）のデータベースと、ユーザ `equipment` は、最初の起動のときに自動でできる（手順書の手順5）。
-- `secret.example.yml` をコピーして `secret.yml` を作り、データベースのユーザ名（`equipment`）と、.env の `MYSQL_PASSWORD` と同じパスワードを書く。
+- MySQL 8.4.13 を PC に直接入れる（Document の internaldesign/環境構築手順書.md の手順4）。Docker は使わない（共通の決まり 3章。2026-11-14 にやめた）。
+- 開発用（equipment_dev）とテスト用（equipment_test）のデータベースと、アプリ用のユーザ `equipment` を作る（手順書の手順5。SQL がある）。
+- `secret.example.yml` をコピーして `secret.yml` を作り、データベースのユーザ名（`equipment`）と、手順5で決めたパスワードを書く。あわせて `app.initial-admin-email` に、メールアドレスの形の値を書く（空だと、最初の起動で止まる。手順6）。
 
 | やること | コマンド（このフォルダで） |
 |---|---|
 | Claude Code を起動する | `claude --add-dir ../EquipmentManagementSystem_Document` |
-| MySQL を起動する・止める | `docker compose up -d`・`docker compose stop`（データは残る。`docker compose down -v` はデータも消すので、人に確かめてから） |
-| MySQL が動いているか確かめる | `docker compose ps`（STATUS が healthy） |
+| MySQL を起動する・止める | Windows のサービス `MySQL84`（PC を起動すると自動で動く）。管理者の PowerShell で `Start-Service MySQL84`・`Stop-Service MySQL84`（データは残る） |
+| MySQL が動いているか確かめる | `Get-Service *mysql*`（Status が Running） |
 | サーバーを起動する（開発用の設定） | `.\gradlew.bat bootRun`（Eclipse なら、EquipmentApplication を右クリック →「実行」→「Spring Boot アプリケーション」） |
 | 動いているか確かめる | ブラウザで http://localhost:8080/api/health を開く |
 | サーバーのテスト | `.\gradlew.bat test`（結果は build/reports/tests/test/index.html） |
@@ -47,7 +47,7 @@ Claude Code が .gitignore に入れる（共通の CLAUDE.md 7章）。公開�
 | もの | 理由 |
 |---|---|
 | secret.yml | 秘密の値（パスワード、トークン） |
-| .env | Docker の MySQL のパスワード（compose.yaml が読む） |
+| .env | 以前の Docker の手順で使っていた、MySQL のパスワードのファイル。もう使わないが、PC に残っていても Git に入れない |
 | logs/ | ログ |
 | build/、.gradle/ | Gradle が作るもの |
 | bin/ | Eclipse が作るもの |
