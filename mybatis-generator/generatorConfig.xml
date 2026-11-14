@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<!--
+  MyBatis Generator（テーブルから Mapper・テーブルの形・Example を自動で作る道具）の設定（CLAUDE.md 4.1・5章）。
+  動かし方：Server のフォルダで .\gradlew.bat mybatisGenerator（build.gradle の mybatisGenerator タスク）。
+  データベースのアドレス・ユーザ名・パスワードは、build.gradle が application-dev.yml と secret.yml から読んで渡す。
+
+  作るもの
+  - dao.entity：テーブルの1行の形（例：Category）と Example（例：CategoryExample。取得の条件を組み立てる部品）
+  - dao.mapper：Mapper（例：CategoryMapper）と、その XML（src/main/resources/jp/co/highjunk/equipment/dao/mapper/）
+  作ったファイルは手で直さない。テーブルが変わったら、このタスクで作り直す。
+  dao.mapper.custom（手で書く Mapper）は、ここでは作らないので、作り直しても消えない。
+-->
+<generatorConfiguration>
+  <!--
+    targetRuntime="MyBatis3"：XML に SQL を書き、Example（Criteria）で条件を組み立てる形。
+    defaultModelType="flat"：1つのテーブルに、テーブルの形のクラスを1つだけ作る（主キー用のクラスに分けない）
+  -->
+  <context id="equipment" targetRuntime="MyBatis3" defaultModelType="flat">
+    <property name="javaFileEncoding" value="UTF-8"/>
+    <!-- テーブル名・列名を `` で囲む（MySQL の予約語とぶつからないように） -->
+    <property name="autoDelimitKeywords" value="true"/>
+    <property name="beginningDelimiter" value="`"/>
+    <property name="endingDelimiter" value="`"/>
+
+    <!-- Mapper に @Mapper を付ける（common.config.MyBatisConfig が @Mapper の付いたものを探すため） -->
+    <plugin type="org.mybatis.generator.plugins.MapperAnnotationPlugin"/>
+
+    <commentGenerator>
+      <!-- 作り直すときに要る最低限の印だけを付ける（作った日時などは付けない。作り直すたびに差分が出ないように） -->
+      <property name="minimizeComments" value="true"/>
+    </commentGenerator>
+
+    <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+        connectionURL="${mbg.jdbc.url}" userId="${mbg.jdbc.user}" password="${mbg.jdbc.password}">
+      <!-- equipment_dev のテーブルだけを読む（同じ MySQL にある equipment_test などを読まない） -->
+      <property name="nullCatalogMeansCurrent" value="true"/>
+    </jdbcConnection>
+
+    <modelGenerator targetPackage="jp.co.highjunk.equipment.dao.entity" targetProject="src/main/java"/>
+    <sqlMapGenerator targetPackage="jp.co.highjunk.equipment.dao.mapper" targetProject="src/main/resources"/>
+    <clientGenerator type="XMLMAPPER" targetPackage="jp.co.highjunk.equipment.dao.mapper" targetProject="src/main/java"/>
+
+    <!--
+      テーブルの形のクラスの名前は、テーブル名の単数形にする（2026-11-15 に決めた。CLAUDE.md 5章の命名規則）。
+      AUTO_INCREMENT の id は、足したあとに、作られた値をテーブルの形のクラスに戻す（generatedKey）。
+      GENERATED ALWAYS の列（削除されていない行だけの重複を防ぐための列）は、MySQL が値を作るので、足す・変える SQL に入れない（isGeneratedAlways）。
+    -->
+    <table tableName="roles" domainObjectName="Role">
+      <generatedKey column="id" sqlStatement="JDBC"/>
+      <columnOverride column="name_active" isGeneratedAlways="true"/>
+    </table>
+    <table tableName="permissions" domainObjectName="Permission"/>
+    <table tableName="role_permissions" domainObjectName="RolePermission"/>
+    <table tableName="users" domainObjectName="User">
+      <generatedKey column="id" sqlStatement="JDBC"/>
+      <columnOverride column="email_active" isGeneratedAlways="true"/>
+    </table>
+    <table tableName="categories" domainObjectName="Category">
+      <generatedKey column="id" sqlStatement="JDBC"/>
+      <columnOverride column="name_active" isGeneratedAlways="true"/>
+      <columnOverride column="initial_active" isGeneratedAlways="true"/>
+    </table>
+    <table tableName="equipment" domainObjectName="Equipment">
+      <generatedKey column="id" sqlStatement="JDBC"/>
+      <columnOverride column="management_no_active" isGeneratedAlways="true"/>
+    </table>
+    <table tableName="loans" domainObjectName="Loan">
+      <generatedKey column="id" sqlStatement="JDBC"/>
+      <columnOverride column="active_equipment_id" isGeneratedAlways="true"/>
+    </table>
+    <table tableName="password_tokens" domainObjectName="PasswordToken">
+      <generatedKey column="id" sqlStatement="JDBC"/>
+    </table>
+    <!-- Spring Security が「ログインしたままにする」ために自分で読み書きするテーブル（2026-11-15 に、これも作ると決めた） -->
+    <table tableName="persistent_logins" domainObjectName="PersistentLogin"/>
+    <table tableName="reminder_runs" domainObjectName="ReminderRun">
+      <generatedKey column="id" sqlStatement="JDBC"/>
+    </table>
+    <table tableName="reminder_logs" domainObjectName="ReminderLog">
+      <generatedKey column="id" sqlStatement="JDBC"/>
+    </table>
+    <table tableName="reminder_log_items" domainObjectName="ReminderLogItem"/>
+    <table tableName="holidays" domainObjectName="Holiday"/>
+  </context>
+</generatorConfiguration>

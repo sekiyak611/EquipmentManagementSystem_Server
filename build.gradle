@@ -19,6 +19,12 @@ repositories {
 	mavenCentral()
 }
 
+// MyBatis Generator（テーブルから Mapper・テーブルの形・Example を自動で作る道具。CLAUDE.md 3章・4.1）を動かすときだけ使う部品。
+// アプリの jar には入らない
+configurations {
+	mybatisGenerator
+}
+
 dependencies {
 	// Web（REST API）・ログインと権限・入力チェック
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
@@ -29,6 +35,16 @@ dependencies {
 	implementation 'org.flywaydb:flyway-mysql'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.1.0'
 	runtimeOnly 'com.mysql:mysql-connector-j'
+	// Lombok：コンストラクタやゲッターなどを、アノテーションで自動で作る（CLAUDE.md 3章）。
+	// 版は Spring Boot が決めたものを使う（ここには書かない）
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// MyBatis Generator（下の mybatisGenerator タスクで使う）と、テーブルを読むための MySQL につなぐ部品
+	mybatisGenerator 'org.mybatis.generator:mybatis-generator-core:2.0.0'
+	mybatisGenerator 'com.mysql:mysql-connector-j'
 
 	// テスト
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
@@ -48,6 +64,61 @@ tasks.named('processResources') {
 	from(clientDist) {
 		into 'static'
 	}
+}
+
+// テーブルから dao.mapper・dao.entity と、その XML を作り直す（CLAUDE.md 4.1・5章。設定は mybatis-generator/generatorConfig.xml）。
+// 使い方：.\gradlew.bat mybatisGenerator
+// 開発用のデータベース（equipment_dev）のテーブルを読む。先に bootRun でサーバーを1回起動し、Flyway でテーブルを最新にしておく。
+// データベースのアドレスは application-dev.yml から、ユーザ名とパスワードは secret.yml から読む（秘密の値をここに書かないため）。
+// 作ったファイルは手で直さない。dao.mapper.custom（手で書く Mapper）には触らない
+tasks.register('mybatisGenerator', JavaExec) {
+	group = 'mybatis'
+	description = 'テーブルから dao.mapper・dao.entity と XML を作り直す'
+	classpath = configurations.mybatisGenerator
+	mainClass = 'org.mybatis.generator.api.ShellRunner'
+	args '-configfile', file('mybatis-generator/generatorConfig.xml').path, '-overwrite'
+	def devYml = file('src/main/resources/application-dev.yml')
+	def secretYml = file('secret.yml')
+	doFirst {
+		if (!secretYml.exists()) {
+			throw new GradleException('secret.yml がない。secret.example.yml をコピーして作る（Server の CLAUDE.md 3章）')
+		}
+		def dev = readSimpleYaml(devYml)
+		def secret = readSimpleYaml(secretYml)
+		systemProperty 'mbg.jdbc.url', dev['spring.datasource.url']
+		systemProperty 'mbg.jdbc.user', secret['spring.datasource.username']
+		systemProperty 'mbg.jdbc.password', secret['spring.datasource.password']
+	}
+}
+
+// 「キー: 値」が字下げで入れ子になっただけの YAML を読み、「spring.datasource.url」のような名前で値を返す。
+// 一覧（- で始まる行）や複数行の値は読めない（secret.yml と application-dev.yml を読むためだけのもの）
+static Map<String, String> readSimpleYaml(File file) {
+	def values = [:]
+	def path = []
+	file.eachLine('UTF-8') { line ->
+		if (line.trim().isEmpty() || line.trim().startsWith('#')) {
+			return
+		}
+		int indent = line.length() - line.stripLeading().length()
+		def matcher = line.trim() =~ /^([^:]+):\s*(.*)$/
+		if (!matcher.matches()) {
+			return
+		}
+		while (!path.isEmpty() && path[-1].indent >= indent) {
+			path.removeLast()
+		}
+		def key = matcher.group(1).trim()
+		def value = matcher.group(2).trim()
+		path << [indent: indent, key: key]
+		if (!value.isEmpty()) {
+			if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+				value = value.substring(1, value.length() - 1)
+			}
+			values[path*.key.join('.')] = value
+		}
+	}
+	return values
 }
 
 // ソースの文字コードはUTF-8（WindowsのPCでも日本語のコメントやメッセージが化けないように）

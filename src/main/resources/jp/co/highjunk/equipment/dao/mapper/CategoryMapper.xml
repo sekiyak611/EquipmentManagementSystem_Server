@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.highjunk.equipment.dao.mapper.CategoryMapper">
+  <resultMap id="BaseResultMap" type="jp.co.highjunk.equipment.dao.entity.Category">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="name_active" jdbcType="VARCHAR" property="nameActive" />
+    <result column="initial" jdbcType="CHAR" property="initial" />
+    <result column="initial_active" jdbcType="CHAR" property="initialActive" />
+    <result column="deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+    <result column="version" jdbcType="INTEGER" property="version" />
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="created_by" jdbcType="BIGINT" property="createdBy" />
+    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="updated_by" jdbcType="BIGINT" property="updatedBy" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    id, `name`, name_active, `initial`, initial_active, deleted_at, version, created_at, 
+    created_by, updated_at, updated_by
+  </sql>
+  <select id="selectByExample" parameterType="jp.co.highjunk.equipment.dao.entity.CategoryExample" resultMap="BaseResultMap">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from categories
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    select 
+    <include refid="Base_Column_List" />
+    from categories
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    delete from categories
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="jp.co.highjunk.equipment.dao.entity.CategoryExample">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    delete from categories
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="jp.co.highjunk.equipment.dao.entity.Category" useGeneratedKeys="true">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    insert into categories (`name`, `initial`, deleted_at, 
+      version, created_at, created_by, 
+      updated_at, updated_by)
+    values (#{name,jdbcType=VARCHAR}, #{initial,jdbcType=CHAR}, #{deletedAt,jdbcType=TIMESTAMP}, 
+      #{version,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=BIGINT}, 
+      #{updatedAt,jdbcType=TIMESTAMP}, #{updatedBy,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="jp.co.highjunk.equipment.dao.entity.Category" useGeneratedKeys="true">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    insert into categories
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="initial != null">
+        `initial`,
+      </if>
+      <if test="deletedAt != null">
+        deleted_at,
+      </if>
+      <if test="version != null">
+        version,
+      </if>
+      <if test="createdAt != null">
+        created_at,
+      </if>
+      <if test="createdBy != null">
+        created_by,
+      </if>
+      <if test="updatedAt != null">
+        updated_at,
+      </if>
+      <if test="updatedBy != null">
+        updated_by,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="initial != null">
+        #{initial,jdbcType=CHAR},
+      </if>
+      <if test="deletedAt != null">
+        #{deletedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="version != null">
+        #{version,jdbcType=INTEGER},
+      </if>
+      <if test="createdAt != null">
+        #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createdBy != null">
+        #{createdBy,jdbcType=BIGINT},
+      </if>
+      <if test="updatedAt != null">
+        #{updatedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatedBy != null">
+        #{updatedBy,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="jp.co.highjunk.equipment.dao.entity.CategoryExample" resultType="java.lang.Long">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    select count(*) from categories
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    update categories
+    <set>
+      <if test="row.id != null">
+        id = #{row.id,jdbcType=BIGINT},
+      </if>
+      <if test="row.name != null">
+        `name` = #{row.name,jdbcType=VARCHAR},
+      </if>
+      <if test="row.initial != null">
+        `initial` = #{row.initial,jdbcType=CHAR},
+      </if>
+      <if test="row.deletedAt != null">
+        deleted_at = #{row.deletedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="row.version != null">
+        version = #{row.version,jdbcType=INTEGER},
+      </if>
+      <if test="row.createdAt != null">
+        created_at = #{row.createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="row.createdBy != null">
+        created_by = #{row.createdBy,jdbcType=BIGINT},
+      </if>
+      <if test="row.updatedAt != null">
+        updated_at = #{row.updatedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="row.updatedBy != null">
+        updated_by = #{row.updatedBy,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="example != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    update categories
+    set id = #{row.id,jdbcType=BIGINT},
+      `name` = #{row.name,jdbcType=VARCHAR},
+      `initial` = #{row.initial,jdbcType=CHAR},
+      deleted_at = #{row.deletedAt,jdbcType=TIMESTAMP},
+      version = #{row.version,jdbcType=INTEGER},
+      created_at = #{row.createdAt,jdbcType=TIMESTAMP},
+      created_by = #{row.createdBy,jdbcType=BIGINT},
+      updated_at = #{row.updatedAt,jdbcType=TIMESTAMP},
+      updated_by = #{row.updatedBy,jdbcType=BIGINT}
+    <if test="example != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="jp.co.highjunk.equipment.dao.entity.Category">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    update categories
+    <set>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="initial != null">
+        `initial` = #{initial,jdbcType=CHAR},
+      </if>
+      <if test="deletedAt != null">
+        deleted_at = #{deletedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="version != null">
+        version = #{version,jdbcType=INTEGER},
+      </if>
+      <if test="createdAt != null">
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createdBy != null">
+        created_by = #{createdBy,jdbcType=BIGINT},
+      </if>
+      <if test="updatedAt != null">
+        updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatedBy != null">
+        updated_by = #{updatedBy,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="jp.co.highjunk.equipment.dao.entity.Category">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    update categories
+    set `name` = #{name,jdbcType=VARCHAR},
+      `initial` = #{initial,jdbcType=CHAR},
+      deleted_at = #{deletedAt,jdbcType=TIMESTAMP},
+      version = #{version,jdbcType=INTEGER},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      created_by = #{createdBy,jdbcType=BIGINT},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      updated_by = #{updatedBy,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
