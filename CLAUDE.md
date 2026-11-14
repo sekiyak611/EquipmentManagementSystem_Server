@@ -36,6 +36,7 @@
 | 動いているか確かめる | ブラウザで http://localhost:8080/api/health を開く |
 | サーバーのテスト | `.\gradlew.bat test`（結果は build/reports/tests/test/index.html） |
 | テーブルを作る・変える | サーバーを起動すると Flyway が自動で反映する |
+| dao.mapper・dao.entity を作り直す（MyBatis Generator） | テーブルを変えたら、先に bootRun で開発用のデータベースに反映してから `.\gradlew.bat mybatisGenerator`。設定は mybatis-generator/generatorConfig.xml。作り直すときは2人で相談する（共通の決まり 9章） |
 
 AWS 用に組み立てるときは、先に Client のフォルダで `npm run build` を動かしてから、このフォルダで `.\gradlew.bat bootJar` を動かす。build.gradle が、隣の Client の dist（組み立てた画面）を jar に取り込む（詳細設計 common.md 3.9）。
 

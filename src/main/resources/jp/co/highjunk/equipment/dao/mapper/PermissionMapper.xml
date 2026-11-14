@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.highjunk.equipment.dao.mapper.PermissionMapper">
+  <resultMap id="BaseResultMap" type="jp.co.highjunk.equipment.dao.entity.Permission">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    <id column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="group_name" jdbcType="VARCHAR" property="groupName" />
+    <result column="sort_order" jdbcType="INTEGER" property="sortOrder" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    code, `name`, group_name, sort_order
+  </sql>
+  <select id="selectByExample" parameterType="jp.co.highjunk.equipment.dao.entity.PermissionExample" resultMap="BaseResultMap">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from permissions
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    select 
+    <include refid="Base_Column_List" />
+    from permissions
+    where code = #{code,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    delete from permissions
+    where code = #{code,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="jp.co.highjunk.equipment.dao.entity.PermissionExample">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    delete from permissions
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="jp.co.highjunk.equipment.dao.entity.Permission">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    insert into permissions (code, `name`, group_name, 
+      sort_order)
+    values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{groupName,jdbcType=VARCHAR}, 
+      #{sortOrder,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="jp.co.highjunk.equipment.dao.entity.Permission">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    insert into permissions
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="code != null">
+        code,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="groupName != null">
+        group_name,
+      </if>
+      <if test="sortOrder != null">
+        sort_order,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="code != null">
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="groupName != null">
+        #{groupName,jdbcType=VARCHAR},
+      </if>
+      <if test="sortOrder != null">
+        #{sortOrder,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="jp.co.highjunk.equipment.dao.entity.PermissionExample" resultType="java.lang.Long">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    select count(*) from permissions
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    update permissions
+    <set>
+      <if test="row.code != null">
+        code = #{row.code,jdbcType=VARCHAR},
+      </if>
+      <if test="row.name != null">
+        `name` = #{row.name,jdbcType=VARCHAR},
+      </if>
+      <if test="row.groupName != null">
+        group_name = #{row.groupName,jdbcType=VARCHAR},
+      </if>
+      <if test="row.sortOrder != null">
+        sort_order = #{row.sortOrder,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="example != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    update permissions
+    set code = #{row.code,jdbcType=VARCHAR},
+      `name` = #{row.name,jdbcType=VARCHAR},
+      group_name = #{row.groupName,jdbcType=VARCHAR},
+      sort_order = #{row.sortOrder,jdbcType=INTEGER}
+    <if test="example != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="jp.co.highjunk.equipment.dao.entity.Permission">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    update permissions
+    <set>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="groupName != null">
+        group_name = #{groupName,jdbcType=VARCHAR},
+      </if>
+      <if test="sortOrder != null">
+        sort_order = #{sortOrder,jdbcType=INTEGER},
+      </if>
+    </set>
+    where code = #{code,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="jp.co.highjunk.equipment.dao.entity.Permission">
+    <!--
+      Generated Code - @mbg.generated
+    -->
+    update permissions
+    set `name` = #{name,jdbcType=VARCHAR},
+      group_name = #{groupName,jdbcType=VARCHAR},
+      sort_order = #{sortOrder,jdbcType=INTEGER}
+    where code = #{code,jdbcType=VARCHAR}
+  </update>
+</mapper>
