@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- テストだけで使う mapper の SQL（MyBatisConfigTest）。 -->
-<mapper namespace="jp.co.highjunk.equipment.mapper.namecheck.first.SameNameMapper">
-
-	<select id="selectNumber" resultType="int">
-		SELECT 1
-	</select>
-</mapper>

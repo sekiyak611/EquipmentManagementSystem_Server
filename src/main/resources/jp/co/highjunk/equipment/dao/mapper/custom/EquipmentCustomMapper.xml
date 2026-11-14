@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- equipment の、手で書く SQL（読むだけ。CLAUDE.md 4.1・5章）。JOIN とサブクエリは使わない。値は #{} で渡す。 -->
+<!-- equipment の、手で書く SQL（CLAUDE.md 4.1・5章）。JOIN とサブクエリは使わない。
+     値は #{} で渡し、並び順の列も choose で選ぶ（文字をつなげて SQL を作らない）。 -->
 <mapper namespace="jp.co.highjunk.equipment.dao.mapper.custom.EquipmentCustomMapper">
 
 	<!-- 管理状態（status）は問わない。廃棄・不明の備品も数える（画面設計 16章「削除されていない備品」） -->
@@ -18,5 +19,85 @@
 		WHERE category_id = #{categoryId}
 		  AND deleted_at IS NULL
 		FOR SHARE
+	</select>
+
+	<!-- C-06：確かめてから書き換えるまで、行を押さえる -->
+	<select id="selectByIdForUpdate" resultType="jp.co.highjunk.equipment.dao.entity.Equipment">
+		SELECT id, management_no, category_id, maker, model, serial_no, size, resolution, height_adjustable, pivot,
+		       purchased_on, warranty_until, status, disposed_on, last_confirmed_on, note, deleted_at, version,
+		       created_at, created_by, updated_at, updated_by
+		FROM equipment
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+		FOR UPDATE
+	</select>
+
+	<!-- C-01：探す条件（countBySearch と selectBySearch で同じ） -->
+	<sql id="searchWhere">
+		WHERE deleted_at IS NULL
+		<if test="categoryId != null">
+		  AND category_id = #{categoryId}
+		</if>
+		<if test="statuses != null and !statuses.isEmpty()">
+		  AND status IN
+		  <foreach collection="statuses" item="status" open="(" separator="," close=")">#{status}</foreach>
+		</if>
+		<!-- 貸出中だけ（LENT）。貸出中の備品が0件のときは、呼ぶ側が SQL を出さない -->
+		<if test="lentEquipmentIds != null">
+		  AND id IN
+		  <foreach collection="lentEquipmentIds" item="id" open="(" separator="," close=")">#{id}</foreach>
+		</if>
+		<!-- 保管中だけ（IN_STOCK） -->
+		<if test="notLentEquipmentIds != null and !notLentEquipmentIds.isEmpty()">
+		  AND id NOT IN
+		  <foreach collection="notLentEquipmentIds" item="id" open="(" separator="," close=")">#{id}</foreach>
+		</if>
+		<!-- 今月確認済みかは、管理中の備品にだけ効かせる（C-01 の5章 No.5） -->
+		<if test="confirm != null and confirm.name() == 'CONFIRMED'">
+		  AND (status &lt;&gt; 'MANAGED' OR last_confirmed_on &gt;= #{firstDayOfThisMonth})
+		</if>
+		<if test="confirm != null and confirm.name() == 'UNCONFIRMED'">
+		  AND (status &lt;&gt; 'MANAGED' OR last_confirmed_on IS NULL OR last_confirmed_on &lt; #{firstDayOfThisMonth})
+		</if>
+		<!-- キーワード：管理番号・メーカー・モデル・シリアルNo・借用者の氏名。小文字にそろえて比べる（データ設計 2章） -->
+		<if test="keywordPattern != null">
+		  AND (LOWER(management_no) LIKE #{keywordPattern} ESCAPE '!'
+		    OR LOWER(maker) LIKE #{keywordPattern} ESCAPE '!'
+		    OR LOWER(model) LIKE #{keywordPattern} ESCAPE '!'
+		    OR LOWER(serial_no) LIKE #{keywordPattern} ESCAPE '!'
+		    <if test="keywordEquipmentIds != null and !keywordEquipmentIds.isEmpty()">
+		    OR id IN
+		    <foreach collection="keywordEquipmentIds" item="id" open="(" separator="," close=")">#{id}</foreach>
+		    </if>
+		  )
+		</if>
+	</sql>
+
+	<select id="countBySearch" resultType="long">
+		SELECT COUNT(*)
+		FROM equipment
+		<include refid="searchWhere" />
+	</select>
+
+	<!-- 最終確認日の昇順では、未記入（NULL）が先頭（古い扱い）、降順では末尾になる（MySQL の並び方。C-01 の12章 No.4） -->
+	<select id="selectBySearch" resultType="jp.co.highjunk.equipment.dao.entity.Equipment">
+		SELECT id, management_no, category_id, maker, model, status, last_confirmed_on
+		FROM equipment
+		<include refid="searchWhere" />
+		<choose>
+			<when test="sort.name() == 'LAST_CONFIRMED_ON' and descending">
+		ORDER BY last_confirmed_on DESC, management_no ASC, id ASC
+			</when>
+			<when test="sort.name() == 'LAST_CONFIRMED_ON'">
+		ORDER BY last_confirmed_on ASC, management_no ASC, id ASC
+			</when>
+			<when test="descending">
+		ORDER BY management_no DESC, id DESC
+			</when>
+			<otherwise>
+		ORDER BY management_no ASC, id ASC
+			</otherwise>
+		</choose>
+		LIMIT #{limit} OFFSET #{offset}
 	</select>
 </mapper>

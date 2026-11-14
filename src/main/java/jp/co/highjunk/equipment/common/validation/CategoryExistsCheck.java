@@ -19,9 +19,12 @@ public class CategoryExistsCheck implements ConstraintValidator<CategoryExists, 
 
 	private boolean forUpdate;
 
+	private boolean forShare;
+
 	@Override
 	public void initialize(CategoryExists annotation) {
 		forUpdate = annotation.forUpdate();
+		forShare = annotation.forShare();
 	}
 
 	@Override
@@ -31,6 +34,9 @@ public class CategoryExistsCheck implements ConstraintValidator<CategoryExists, 
 		}
 		if (forUpdate) {
 			return categoryCustomMapper.selectByIdForUpdate(id) != null;
+		}
+		if (forShare) {
+			return categoryCustomMapper.selectByIdForShare(id) != null;
 		}
 		CategoryExample example = new CategoryExample();
 		example.createCriteria().andIdEqualTo(id).andDeletedAtIsNull();

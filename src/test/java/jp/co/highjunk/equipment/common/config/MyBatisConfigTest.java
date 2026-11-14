@@ -20,10 +20,10 @@ class MyBatisConfigTest {
 	ApplicationContext context;
 
 	@Autowired
-	jp.co.highjunk.equipment.mapper.namecheck.first.SameNameMapper firstMapper;
+	jp.co.highjunk.equipment.dao.mapper.namecheck.first.SameNameMapper firstMapper;
 
 	@Autowired
-	jp.co.highjunk.equipment.mapper.namecheck.second.SameNameMapper secondMapper;
+	jp.co.highjunk.equipment.dao.mapper.namecheck.second.SameNameMapper secondMapper;
 
 	@Test
 	@DisplayName("同じ名前の mapper がパッケージ違いで2つあっても、起動でき、それぞれの SQL が動く")
@@ -35,9 +35,9 @@ class MyBatisConfigTest {
 	@Test
 	@DisplayName("mapper の部品の名前は、パッケージ込みの名前になる")
 	void beanNameIsFullyQualified() {
-		assertThat(context.containsBean("jp.co.highjunk.equipment.mapper.namecheck.first.SameNameMapper")).isTrue();
-		assertThat(context.containsBean("jp.co.highjunk.equipment.mapper.namecheck.second.SameNameMapper")).isTrue();
-		assertThat(context.containsBean("jp.co.highjunk.equipment.mapper.auth.UserMapper")).isTrue();
+		assertThat(context.containsBean("jp.co.highjunk.equipment.dao.mapper.namecheck.first.SameNameMapper")).isTrue();
+		assertThat(context.containsBean("jp.co.highjunk.equipment.dao.mapper.namecheck.second.SameNameMapper")).isTrue();
+		assertThat(context.containsBean("jp.co.highjunk.equipment.dao.mapper.UserMapper")).isTrue();
 		assertThat(context.containsBean("sameNameMapper")).isFalse();
 	}
 }

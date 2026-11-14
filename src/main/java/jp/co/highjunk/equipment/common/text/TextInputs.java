@@ -18,6 +18,17 @@ public final class TextInputs {
 	}
 
 	/**
+	 * 前後の空白（全角の空白も）を取り除き、空なら null（入力なし）にする（C-03 の文字の項目。2026-11-11 に人が決めた）。
+	 */
+	public static String stripToNull(String value) {
+		if (value == null) {
+			return null;
+		}
+		String stripped = value.strip();
+		return stripped.isEmpty() ? null : stripped;
+	}
+
+	/**
 	 * 前後の空白を取り除き、空なら null にする。そうでなければ大文字にする。
 	 * 半角の a〜z だけが A〜Z になる（全角の英字は大文字になっても、形式のチェックで誤りになる）。
 	 */

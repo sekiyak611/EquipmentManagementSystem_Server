@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- A-08 の SQL（手で書く。CLAUDE.md 4.1）。 -->
+<mapper namespace="jp.co.highjunk.equipment.dao.mapper.custom.HealthCustomMapper">
+
+	<!-- データベースにつながるかだけを確かめる -->
+	<select id="selectOne" resultType="int">
+		SELECT 1
+	</select>
+</mapper>
