@@ -1,5 +1,6 @@
 package jp.co.highjunk.equipment.common.security;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,7 +44,9 @@ public class LoginUserRefresherImpl implements LoginUserRefresher {
 			return Optional.empty();
 		}
 		User user = users.get(0);
-		if (user.getSessionValidAfter() != null && loginUser.loggedInAt().isBefore(user.getSessionValidAfter())) {
+		// session_valid_after は秒まで（DATETIME）なので、ログインした日時も秒までにそろえて比べる（詳細設計 common.md 3.10）
+		if (user.getSessionValidAfter() != null
+				&& loginUser.loggedInAt().truncatedTo(ChronoUnit.SECONDS).isBefore(user.getSessionValidAfter())) {
 			log.info("パスワードが変わったため、ログアウトさせました（userId={}）", loginUser.userId());
 			return Optional.empty();
 		}

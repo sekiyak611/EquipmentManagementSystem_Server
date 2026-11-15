@@ -39,4 +39,18 @@ public interface UserCustomMapper {
 	 * @return ユーザのID（いなければ null）
 	 */
 	Long selectIdForUpdate(@Param("id") long id);
+
+	/**
+	 * パスワードを新しいものにし、ロックを解き、失敗の回数を0に戻し、すべての端末のログインを切る（A-06）。
+	 * locked_at を NULL にするので、Example の updateByExampleSelective（null の列は書き換えない）では書けない。
+	 * version は増やさない。削除されたユーザは書き換えない。
+	 *
+	 * @param id                ユーザのID
+	 * @param passwordHash      新しいパスワードのハッシュ（bcrypt）
+	 * @param sessionValidAfter この日時より前にログインした端末は切る（今。秒までにそろえたもの。詳細設計 A-06 の12章 No.1）
+	 * @param now               更新日時（今）
+	 * @return 書き換えた行の数（削除されていれば 0）
+	 */
+	int updatePassword(@Param("id") long id, @Param("passwordHash") String passwordHash,
+			@Param("sessionValidAfter") LocalDateTime sessionValidAfter, @Param("now") LocalDateTime now);
 }
