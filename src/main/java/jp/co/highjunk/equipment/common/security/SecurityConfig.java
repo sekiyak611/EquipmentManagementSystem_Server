@@ -41,6 +41,9 @@ public class SecurityConfig {
 			"/api/health",
 	};
 
+	/** テスト用のAPI（common.slack の送ったDMの読み出し。詳細設計 common.md 3.13）。ログインなし・CSRFの合言葉なしで呼べる。 */
+	private static final String TEST_SUPPORT_APIS = "/api/test-support/**";
+
 	/** パスワードの変換と照らし合わせ。bcrypt（元に戻せない形に変換する計算方法。docs/基本設計書.md 5章） */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -70,13 +73,16 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(HttpMethod.POST, PUBLIC_POST_APIS).permitAll()
 						.requestMatchers(HttpMethod.GET, PUBLIC_GET_APIS).permitAll()
+						// テスト用（送ったDMを読み出す。3.13）。app.test-support.enabled が false のときは、受け持つ controller がなく 404
+						.requestMatchers(TEST_SUPPORT_APIS).permitAll()
 						// ほかの API はログインが必要。権限項目は各APIの @PreAuthorize で確かめる（CLAUDE.md 5章）
 						.requestMatchers("/api/**").authenticated()
 						// 画面のファイル（React）はだれでも受け取れる（ZPOP-22 で配る）
 						.anyRequest().permitAll())
 				// なりすまし対策（CSRF）。サーバーは XSRF-TOKEN というクッキーで合言葉を渡し、
 				// 画面は X-XSRF-TOKEN という見出しに入れて送り返す（画面（React）向けの設定）
-				.csrf(csrf -> csrf.spa().csrfTokenRepository(csrfTokenRepository))
+				.csrf(csrf -> csrf.spa().csrfTokenRepository(csrfTokenRepository)
+						.ignoringRequestMatchers(TEST_SUPPORT_APIS))
 				// ログイン状態はセッションに入れる（LoginSession が保存する）
 				.securityContext(context -> context.securityContextRepository(securityContextRepository))
 				// APIを呼ぶたびに、ログインしている人の権限項目を読み直す（3.10）
