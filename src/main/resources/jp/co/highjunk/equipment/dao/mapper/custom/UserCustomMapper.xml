@@ -27,4 +27,17 @@
 		WHERE id = #{id}
 		FOR UPDATE
 	</select>
+
+	<!-- パスワードを決める（A-06）。locked_at を NULL に戻す。version は増やさない。updated_by は本人 -->
+	<update id="updatePassword">
+		UPDATE users
+		SET password_hash = #{passwordHash},
+		    failed_login_count = 0,
+		    locked_at = NULL,
+		    session_valid_after = #{sessionValidAfter},
+		    updated_at = #{now},
+		    updated_by = #{id}
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+	</update>
 </mapper>
