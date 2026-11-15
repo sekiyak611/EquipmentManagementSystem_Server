@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- users の、手で書く SQL（読むだけ。CLAUDE.md 4.1・5章）。JOIN とサブクエリは使わない。値は #{} で渡す。
+<!-- users の、手で書く SQL（CLAUDE.md 4.1・5章）。JOIN とサブクエリは使わない。値は #{} で渡す。
      大文字・小文字を区別せずに探すため、氏名を小文字にそろえて比べる（データ設計 2章）。 -->
 <mapper namespace="jp.co.highjunk.equipment.dao.mapper.custom.UserCustomMapper">
 
@@ -9,4 +9,14 @@
 		FROM users
 		WHERE LOWER(name) LIKE #{keywordPattern} ESCAPE '!'
 	</select>
+
+	<!-- 失敗の回数を、SQL の中で1足す（同時に間違えても数えもれない）。ロック済み・削除済みの行は数えない -->
+	<update id="incrementFailedLoginCount">
+		UPDATE users
+		SET failed_login_count = failed_login_count + 1,
+		    updated_at = #{now}
+		WHERE id = #{id}
+		  AND locked_at IS NULL
+		  AND deleted_at IS NULL
+	</update>
 </mapper>
