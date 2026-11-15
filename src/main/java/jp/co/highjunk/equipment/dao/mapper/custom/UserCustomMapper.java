@@ -30,4 +30,13 @@ public interface UserCustomMapper {
 	 * @return 増やした行の数（ロック済み・削除済みなら 0）
 	 */
 	int incrementFailedLoginCount(@Param("id") long id, @Param("now") LocalDateTime now);
+
+	/**
+	 * ユーザの行をロックして読む（FOR UPDATE。A-04）。同じ人への依頼が同時に来たとき、1つずつ処理するために使う。
+	 * ロックは、呼んだ側の {@code @Transactional} が終わるまで続く。Example では書けないので、手で書く。
+	 *
+	 * @param id ユーザのID
+	 * @return ユーザのID（いなければ null）
+	 */
+	Long selectIdForUpdate(@Param("id") long id);
 }

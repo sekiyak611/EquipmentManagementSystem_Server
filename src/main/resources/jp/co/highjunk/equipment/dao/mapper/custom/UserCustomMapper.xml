@@ -19,4 +19,12 @@
 		  AND locked_at IS NULL
 		  AND deleted_at IS NULL
 	</update>
+
+	<!-- 行をロックして読む（A-04。同じ人への依頼を1つずつ処理するため）。ロックは、呼んだ側のトランザクションが終わるまで続く -->
+	<select id="selectIdForUpdate" resultType="long">
+		SELECT id
+		FROM users
+		WHERE id = #{id}
+		FOR UPDATE
+	</select>
 </mapper>
