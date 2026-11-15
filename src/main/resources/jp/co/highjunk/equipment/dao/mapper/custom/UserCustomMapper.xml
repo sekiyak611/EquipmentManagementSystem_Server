@@ -40,4 +40,17 @@
 		WHERE id = #{id}
 		  AND deleted_at IS NULL
 	</update>
+
+	<!-- 自分のパスワードを変える（A-07）。ロックは解除しない。version は増やさない。updated_by は本人。読んだハッシュと同じときだけ書き換える -->
+	<update id="changePassword">
+		UPDATE users
+		SET password_hash = #{passwordHash},
+		    failed_login_count = CASE WHEN locked_at IS NULL THEN 0 ELSE failed_login_count END,
+		    session_valid_after = #{sessionValidAfter},
+		    updated_at = #{now},
+		    updated_by = #{id}
+		WHERE id = #{id}
+		  AND password_hash = #{expectedHash}
+		  AND deleted_at IS NULL
+	</update>
 </mapper>

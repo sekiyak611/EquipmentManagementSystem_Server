@@ -1,4 +1,4 @@
-package jp.co.highjunk.equipment.api.auth.login.service;
+package jp.co.highjunk.equipment.common.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,14 +13,14 @@ import jp.co.highjunk.equipment.dao.entity.User;
 import lombok.RequiredArgsConstructor;
 
 /**
- * A-01：ロックしたことを、本人にSlackのDM（画面設計 9章の③）で知らせる（詳細設計 auth/A-01_ログイン.md 4.1）。
+ * ロックしたことを、本人にSlackのDM（画面設計 9章の③）で知らせる（詳細設計 common.md 3.16、auth/A-01_ログイン.md 4.1）。A-01・A-07 が使う。
  * {@code @Transactional} の外（書き込みが確定したあと）で呼ぶ（CLAUDE.md 5章）。送れなくても、ロックはそのまま。
  */
 @Component
 @RequiredArgsConstructor
-public class AuthLoginLockNotifier {
+public class AccountLockNotifier {
 
-	private static final Logger log = LoggerFactory.getLogger(AuthLoginLockNotifier.class);
+	private static final Logger log = LoggerFactory.getLogger(AccountLockNotifier.class);
 
 	/** DMの見出し（画面設計 9章の③） */
 	static final String TITLE = "【備品管理】アカウントをロックしました";

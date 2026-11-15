@@ -53,4 +53,20 @@ public interface UserCustomMapper {
 	 */
 	int updatePassword(@Param("id") long id, @Param("passwordHash") String passwordHash,
 			@Param("sessionValidAfter") LocalDateTime sessionValidAfter, @Param("now") LocalDateTime now);
+
+	/**
+	 * ログインしている本人が、自分のパスワードを変える（A-07）。この端末以外のログインを切る（session_valid_after）。
+	 * A-06 の updatePassword と違い、ロック（locked_at）は解除しない。失敗の回数は、ロックされていなければ 0 に戻す。
+	 * 読んだあとにパスワードがほかで変わっていたときは書き換えない（条件に、読んだハッシュを入れる）。version は増やさない。
+	 *
+	 * @param id                ユーザのID（updated_by にも入れる）
+	 * @param expectedHash      読んだときのパスワードのハッシュ（これと同じときだけ書き換える）
+	 * @param passwordHash      新しいパスワードのハッシュ（bcrypt）
+	 * @param sessionValidAfter この日時より前にログインした端末は切る（今。秒までにそろえたもの）
+	 * @param now               更新日時（今）
+	 * @return 書き換えた行の数（読んだあとに変わっていた・削除されていれば 0）
+	 */
+	int changePassword(@Param("id") long id, @Param("expectedHash") String expectedHash,
+			@Param("passwordHash") String passwordHash, @Param("sessionValidAfter") LocalDateTime sessionValidAfter,
+			@Param("now") LocalDateTime now);
 }
