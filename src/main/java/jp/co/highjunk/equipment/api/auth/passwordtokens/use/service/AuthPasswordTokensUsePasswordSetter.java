@@ -15,6 +15,7 @@ import jp.co.highjunk.equipment.api.auth.passwordtokens.use.validator.AuthPasswo
 import jp.co.highjunk.equipment.common.error.BusinessRuleException;
 import jp.co.highjunk.equipment.common.passwordlink.PasswordLinkVerifier;
 import jp.co.highjunk.equipment.common.passwordlink.VerifiedPasswordLink;
+import jp.co.highjunk.equipment.common.security.LoginRememberMe;
 import jp.co.highjunk.equipment.dao.entity.PasswordToken;
 import jp.co.highjunk.equipment.dao.entity.PasswordTokenExample;
 import jp.co.highjunk.equipment.dao.entity.User;
@@ -42,6 +43,8 @@ public class AuthPasswordTokensUsePasswordSetter {
 	private final UserCustomMapper userCustomMapper;
 
 	private final PasswordEncoder passwordEncoder;
+
+	private final LoginRememberMe loginRememberMe;
 
 	private final Clock clock;
 
@@ -74,6 +77,8 @@ public class AuthPasswordTokensUsePasswordSetter {
 				now.truncatedTo(ChronoUnit.SECONDS), now) != 1) {
 			throw unusable("ユーザが削除された", user.getId());
 		}
+		// すべての端末の「ログインしたまま」を切る（common.md 3.17の6）。まとまりの中なので、元に戻るときは一緒に戻る
+		loginRememberMe.removeAllOf(user.getEmail());
 		return new AuthPasswordTokensUsePasswordSetResult(user, link.getPurpose(), now);
 	}
 

@@ -34,7 +34,8 @@ public class AuthLoginController {
 			HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 		AuthLoginRestOutDto restOutDto = service
 				.login(new AuthLoginServiceInDto(restInDto.getEmail(), restInDto.getPassword()));
-		loginSession.start(restOutDto.getId(), restOutDto.getPermissions(), httpRequest, httpResponse);
+		loginSession.start(restOutDto.getId(), restOutDto.getPermissions(), Boolean.TRUE.equals(restInDto.getRememberMe()),
+				httpRequest, httpResponse);
 		return ApiResponse.ok(restOutDto);
 	}
 }

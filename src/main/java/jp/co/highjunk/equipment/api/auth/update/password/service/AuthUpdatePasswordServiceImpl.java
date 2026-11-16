@@ -18,6 +18,7 @@ import jp.co.highjunk.equipment.common.passwordlink.IssuedPasswordLink;
 import jp.co.highjunk.equipment.common.passwordlink.PasswordChangedNotifier;
 import jp.co.highjunk.equipment.common.security.AccountLockNotifier;
 import jp.co.highjunk.equipment.common.security.LoginFailureRecorder;
+import jp.co.highjunk.equipment.common.security.LoginRememberMe;
 import jp.co.highjunk.equipment.dao.entity.User;
 import jp.co.highjunk.equipment.dao.mapper.UserMapper;
 import jp.co.highjunk.equipment.dao.mapper.custom.UserCustomMapper;
@@ -45,6 +46,8 @@ public class AuthUpdatePasswordServiceImpl implements AuthUpdatePasswordService 
 	private final AccountLockNotifier lockNotifier;
 
 	private final PasswordChangedNotifier changedNotifier;
+
+	private final LoginRememberMe loginRememberMe;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -80,6 +83,8 @@ public class AuthUpdatePasswordServiceImpl implements AuthUpdatePasswordService 
 			log.warn("パスワードを変更できませんでした（読んだあとにパスワードが変わった userId={}）", user.getId());
 			throw new AuthUpdatePasswordWrongCurrentException();
 		}
+		// すべての端末の「ログインしたまま」を切る。この端末の分は、Controller が作り直す（common.md 3.17の6）
+		loginRememberMe.removeAllOf(user.getEmail());
 		log.info("パスワードを変更しました（userId={}）", user.getId());
 
 		changedNotifier.notifyChanged(user.getEmail(), user.getId(), now);

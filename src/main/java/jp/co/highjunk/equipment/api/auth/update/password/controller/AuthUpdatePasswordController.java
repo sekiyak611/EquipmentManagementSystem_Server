@@ -42,6 +42,8 @@ public class AuthUpdatePasswordController {
 	public ApiResponse<Void> update(@Valid @RequestBody AuthUpdatePasswordRestInDto restInDto,
 			@AuthenticationPrincipal LoginUserId user, Authentication authentication, HttpServletRequest httpRequest,
 			HttpServletResponse httpResponse) {
+		// この端末が「ログインしたまま」なら、パスワードを変えたあとも、この端末の分は作り直す（A-07 の5章 No.5）
+		boolean remembered = loginSession.isRemembered(httpRequest);
 		try {
 			service.update(new AuthUpdatePasswordServiceInDto(user.getUserId(), restInDto.getCurrentPassword(),
 					restInDto.getPassword()));
@@ -51,7 +53,7 @@ public class AuthUpdatePasswordController {
 		}
 		List<String> permissions = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 				.toList();
-		loginSession.start(user.getUserId(), permissions, httpRequest, httpResponse);
+		loginSession.start(user.getUserId(), permissions, remembered, httpRequest, httpResponse);
 		return ApiResponse.ok(null);
 	}
 }
