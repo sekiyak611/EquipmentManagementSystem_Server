@@ -84,6 +84,14 @@ public class ReminderCalendar {
 	}
 
 	/**
+	 * 今月の催促の日時を過ぎたか（今がその日時と同じか、あと）。S-05 の案内の出し分けに使う（B-01 の reminderPassed。
+	 * 画面設計 3章「今月の催促日を過ぎても未確認がある」。催促の時刻にDMが送られたあと、とみなす）。
+	 */
+	public boolean isReminderPassed() {
+		return !clock.instant().isBefore(reminderAtOfThisMonth().toInstant());
+	}
+
+	/**
 	 * 催促を送ってよい日か（基本設計書 7章の3の1・2）。
 	 * 今日が平日で、今日がその月の催促日か、それより後。「その月の催促をまだ送っていない」は、呼ぶ側が reminder_runs で確かめる。
 	 */
