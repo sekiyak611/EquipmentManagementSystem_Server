@@ -36,14 +36,18 @@ public class LoginSession {
 
 	private final Clock clock;
 
+	/** 「ログインしたままにする」（60日間。詳細設計 common.md 3.17） */
+	private final LoginRememberMe rememberMe;
+
 	/** すでにセッションがあれば、その番号を変える（セッション固定攻撃を防ぐ） */
 	private final ChangeSessionIdAuthenticationStrategy changeSessionId = new ChangeSessionIdAuthenticationStrategy();
 
 	public LoginSession(SecurityContextRepository securityContextRepository, CsrfTokenRepository csrfTokenRepository,
-			Clock clock) {
+			Clock clock, LoginRememberMe rememberMe) {
 		this.securityContextRepository = securityContextRepository;
 		this.csrfTokenRepository = csrfTokenRepository;
 		this.clock = clock;
+		this.rememberMe = rememberMe;
 	}
 
 	/**
@@ -51,8 +55,10 @@ public class LoginSession {
 	 *
 	 * @param userId      ログインした人のユーザID
 	 * @param permissions ログインした人の権限項目のコード
+	 * @param rememberMe  true なら、この端末を「ログインしたまま」（60日間）にする。false なら、この端末に前の「ログインしたまま」が
+	 *                    あれば、消す（common.md 3.17 の判断 No.2）
 	 */
-	public void start(long userId, Collection<String> permissions, HttpServletRequest request,
+	public void start(long userId, Collection<String> permissions, boolean rememberMe, HttpServletRequest request,
 			HttpServletResponse response) {
 		LoginUser loginUser = new LoginUser(userId, LocalDateTime.now(clock));
 		Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(loginUser, null,
@@ -65,9 +71,23 @@ public class LoginSession {
 		securityContextRepository.saveContext(context, request, response);
 
 		renewCsrfToken(request, response);
+
+		if (rememberMe) {
+			this.rememberMe.remember(userId, request, response);
+		} else {
+			this.rememberMe.forget(request, response);
+		}
 	}
 
-	/** ログインを終える。セッションを捨て、ログイン状態を消し、なりすまし対策の合言葉を作り直す。 */
+	/** この端末に、「ログインしたまま」のクッキーがあるか（A-07 が、パスワードを変えたあと、この端末の分を作り直すかを決めるため）。 */
+	public boolean isRemembered(HttpServletRequest request) {
+		return rememberMe.isRemembered(request);
+	}
+
+	/**
+	 * ログインを終える。セッションを捨て、ログイン状態を消し、なりすまし対策の合言葉を作り直す。
+	 * この端末の「ログインしたまま」（クッキーと、その番号の行）も消す。ほかの端末の分は残る。
+	 */
 	public void end(HttpServletRequest request, HttpServletResponse response) {
 		log.info("ログアウトしました");
 		HttpSession session = request.getSession(false);
@@ -76,6 +96,7 @@ public class LoginSession {
 		}
 		SecurityContextHolder.clearContext();
 		renewCsrfToken(request, response);
+		rememberMe.forget(request, response);
 	}
 
 	/**

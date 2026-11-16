@@ -39,7 +39,11 @@ class SecurityApiTest {
 	@Test
 	@DisplayName("Spring Boot の仮のユーザを作らない（作ると、仮のパスワードがログに出るため）")
 	void noGeneratedUser() {
-		assertThat(context.getBeansOfType(UserDetailsService.class)).isEmpty();
+		// 自分で作る UserDetailsService（「ログインしたままにする」が、メールアドレスからユーザを探すための RememberMeUserDetailsService。
+		// 詳細設計 common.md 3.17）の1つだけ。Spring Boot の仮のユーザ（InMemoryUserDetailsManager）はない
+		assertThat(context.getBeansOfType(UserDetailsService.class).values())
+				.hasSize(1)
+				.allSatisfy(bean -> assertThat(bean).isInstanceOf(RememberMeUserDetailsService.class));
 	}
 
 	@Test

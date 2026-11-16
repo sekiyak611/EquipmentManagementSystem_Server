@@ -1,5 +1,7 @@
 package jp.co.highjunk.equipment.common.security;
 
+import java.time.Clock;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -68,7 +70,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, ApiResponseWriter writer,
 			SecurityContextRepository securityContextRepository, CsrfTokenRepository csrfTokenRepository,
-			LoginUserRefresher loginUserRefresher) throws Exception {
+			LoginUserRefresher loginUserRefresher, LoginRememberMe loginRememberMe, Clock clock) throws Exception {
 		http
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(HttpMethod.POST, PUBLIC_POST_APIS).permitAll()
@@ -85,8 +87,11 @@ public class SecurityConfig {
 						.ignoringRequestMatchers(TEST_SUPPORT_APIS))
 				// ログイン状態はセッションに入れる（LoginSession が保存する）
 				.securityContext(context -> context.securityContextRepository(securityContextRepository))
-				// APIを呼ぶたびに、ログインしている人の権限項目を読み直す（3.10）
-				.addFilterAfter(new LoginRefreshFilter(loginUserRefresher, writer), SecurityContextHolderFilter.class)
+				// セッションが切れていても、「ログインしたまま」のクッキーがあれば、自動でログインし直す（3.17）
+				.addFilterAfter(new RememberMeLoginFilter(loginRememberMe, securityContextRepository, clock),
+						SecurityContextHolderFilter.class)
+				// APIを呼ぶたびに、ログインしている人の権限項目を読み直す（3.10）。自動ログインのあとに動く
+				.addFilterAfter(new LoginRefreshFilter(loginUserRefresher, writer), RememberMeLoginFilter.class)
 				// 最初の画面表示のときから、合言葉のクッキーを渡しておく
 				.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
 				// ログに、操作した人のユーザIDを付ける
