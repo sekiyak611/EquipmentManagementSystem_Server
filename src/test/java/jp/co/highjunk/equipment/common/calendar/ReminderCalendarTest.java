@@ -118,6 +118,37 @@ class ReminderCalendarTest {
 		assertThat(december.reminderDateOfThisMonth()).isEqualTo(LocalDate.of(2026, 12, 25));
 	}
 
+	private static ReminderCalendar calendarAt(int month, int day, int hour, int minute, int second, String cron,
+			LocalDate... holidays) {
+		ZonedDateTime now = ZonedDateTime.of(2026, month, day, hour, minute, second, 0, TOKYO);
+		return new ReminderCalendar(holidays(holidays), Clock.fixed(now.toInstant(), TOKYO), cron);
+	}
+
+	@Test
+	@DisplayName("今月の催促の日時を過ぎたか：催促日の前の日・当日の催促の時刻の前は false、ちょうどの時刻と、あとは true")
+	void isReminderPassed() {
+		// 2026-11 の催促は 11/25（水）9:00
+		assertThat(calendarAt(11, 1, 0, 0, 0, DAILY_9).isReminderPassed()).isFalse();
+		assertThat(calendarAt(11, 24, 23, 59, 59, DAILY_9).isReminderPassed()).isFalse();
+		assertThat(calendarAt(11, 25, 8, 59, 59, DAILY_9).isReminderPassed()).isFalse();
+		assertThat(calendarAt(11, 25, 9, 0, 0, DAILY_9).isReminderPassed()).isTrue();
+		assertThat(calendarAt(11, 25, 18, 0, 0, DAILY_9).isReminderPassed()).isTrue();
+		assertThat(calendarAt(11, 30, 23, 59, 59, DAILY_9).isReminderPassed()).isTrue();
+	}
+
+	@Test
+	@DisplayName("今月の催促の日時を過ぎたか：25日が土日なら前の平日の9:00。設定の時刻にも従う")
+	void isReminderPassedShifted() {
+		// 2026-07 の催促は 7/24（金）9:00（25日は土曜）
+		assertThat(calendarAt(7, 24, 8, 59, 59, DAILY_9).isReminderPassed()).isFalse();
+		assertThat(calendarAt(7, 24, 9, 0, 0, DAILY_9).isReminderPassed()).isTrue();
+		// 7/25（土）・7/26（日）は、催促の日時のあと
+		assertThat(calendarAt(7, 25, 12, 0, 0, DAILY_9).isReminderPassed()).isTrue();
+		// 設定の時刻 8:30 なら、8:30 から
+		assertThat(calendarAt(7, 24, 8, 29, 59, "0 30 8 * * *").isReminderPassed()).isFalse();
+		assertThat(calendarAt(7, 24, 8, 30, 0, "0 30 8 * * *").isReminderPassed()).isTrue();
+	}
+
 	@Test
 	@DisplayName("催促を送ってよい日：催促日の前は false、当日と、あとの平日は true")
 	void isReminderDue() {
