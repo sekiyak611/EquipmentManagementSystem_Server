@@ -1,5 +1,6 @@
 package jp.co.highjunk.equipment.common.security;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -52,15 +53,19 @@ public class LoginRememberMe {
 
 	private final UserMapper userMapper;
 
+	/** 今の時刻は、時計（Clock）から取る（CLAUDE.md 5章。テストで止められる） */
+	private final Clock clock;
+
 	/** 番号ごとの、直近で合言葉を替えたときの記録（替える前の合言葉と、替えた時刻）。同じ番号の自動ログインを、1つずつ処理する鍵にも使う。 */
 	private final ConcurrentMap<String, Rotation> rotations = new ConcurrentHashMap<>();
 
 	public LoginRememberMe(RememberMeTokenRepository tokenRepository, RememberMeUserDetailsService userDetailsService,
-			UserMapper userMapper, AppProperties appProperties,
+			UserMapper userMapper, AppProperties appProperties, Clock clock,
 			@Value("${server.servlet.session.cookie.secure:false}") boolean secureCookie) {
 		this.tokenRepository = tokenRepository;
 		this.userDetailsService = userDetailsService;
 		this.userMapper = userMapper;
+		this.clock = clock;
 		// key は、Spring Security がログイン状態の印に付ける値（ここでは使い道がない。起動のたびに変えてよい）
 		this.services = new PerDeviceRememberMeServices(UUID.randomUUID().toString(), userDetailsService,
 				tokenRepository);
@@ -127,7 +132,7 @@ public class LoginRememberMe {
 		Rotation rotation = rotations.computeIfAbsent(series, key -> new Rotation());
 		// 同じ番号の自動ログインは、1つずつ処理する（ほぼ同時の2つ目は、1つ目が替えたあとに、猶予で入る）
 		synchronized (rotation) {
-			if (rotation.isWithinGrace(presented[1])) {
+			if (rotation.isWithinGrace(presented[1], clock.millis())) {
 				PersistentRememberMeToken current = tokenRepository.getTokenForSeries(series);
 				if (current != null) {
 					return findUserId(current.getUsername());
@@ -135,7 +140,7 @@ public class LoginRememberMe {
 			}
 			Optional<Long> userId = autoLoginOnce(request, response);
 			if (userId.isPresent()) {
-				rotation.rotated(presented[1]);
+				rotation.rotated(presented[1], clock.millis());
 			}
 			removeStaleRotations();
 			return userId;
@@ -164,7 +169,7 @@ public class LoginRememberMe {
 	/** 猶予をすぎた記録を捨てる（たまり続けないように）。 */
 	private void removeStaleRotations() {
 		if (rotations.size() > 1000) {
-			rotations.entrySet().removeIf(entry -> entry.getValue().isStale());
+			rotations.entrySet().removeIf(entry -> entry.getValue().isStale(clock.millis()));
 		}
 	}
 
@@ -180,18 +185,18 @@ public class LoginRememberMe {
 
 		private long rotatedAtMillis;
 
-		synchronized boolean isWithinGrace(String token) {
+		synchronized boolean isWithinGrace(String token, long nowMillis) {
 			return previousToken != null && previousToken.equals(token)
-					&& System.currentTimeMillis() - rotatedAtMillis < GRACE.toMillis();
+					&& nowMillis - rotatedAtMillis < GRACE.toMillis();
 		}
 
-		synchronized void rotated(String token) {
+		synchronized void rotated(String token, long nowMillis) {
 			this.previousToken = token;
-			this.rotatedAtMillis = System.currentTimeMillis();
+			this.rotatedAtMillis = nowMillis;
 		}
 
-		synchronized boolean isStale() {
-			return System.currentTimeMillis() - rotatedAtMillis >= GRACE.toMillis();
+		synchronized boolean isStale(long nowMillis) {
+			return nowMillis - rotatedAtMillis >= GRACE.toMillis();
 		}
 	}
 
