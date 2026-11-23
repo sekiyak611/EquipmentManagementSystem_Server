@@ -20,9 +20,9 @@ public class EquipmentMineUpdateItemValidatorDto {
 	/** 確認する備品のID（重なりを除いたもの） */
 	private final List<Long> equipmentIds;
 
-	/** ServiceImpl が FOR UPDATE で読んだ、今借りている貸出履歴（送られた備品の分。借りられていない備品の分は、ない） */
+	/** ServiceImpl が、押さえずに（普通の SELECT で）読んだ、今借りている貸出履歴（送られた備品の分。借りられていない備品の分は、ない） */
 	private final List<Loan> currentLoans;
 
-	/** ServiceImpl が FOR UPDATE で読んだ、削除されていない備品（送られた ID のうち、見つかったもの） */
+	/** ServiceImpl が FOR UPDATE で押さえて読んだ、削除されていない備品（送られた ID のうち、見つかったもの） */
 	private final List<Equipment> equipments;
 }

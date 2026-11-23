@@ -18,7 +18,7 @@ import jp.co.highjunk.equipment.dao.entity.Loan;
 /**
  * B-04 の業務チェック：送られた備品が、すべて、ある・自分が借りている・管理中であること
  * （詳細設計 equipment/mine/B-04_確認した.md の5・6章）。
- * ServiceImpl が FOR UPDATE で読んだ貸出履歴・備品の行を見て確かめるので、ServiceInDto のチェックではなく Validator で行う
+ * ServiceImpl が読んだ備品（FOR UPDATE で押さえた行）・貸出履歴（押さえずに読んだ行）を見て確かめるので、ServiceInDto のチェックではなく Validator で行う
  * （CLAUDE.md 5章）。読むだけ（Mapper を使わない。書き換えない）。
  */
 @Component
