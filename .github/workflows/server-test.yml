@@ -52,6 +52,10 @@ jobs:
           java-version: '21'
           cache: gradle
 
+      # Windows で作った gradlew には、実行する権限が付いていないため、付ける
+      - name: gradlew に実行権限を付ける
+        run: chmod +x gradlew
+
       - name: テストを全件動かす
         run: ./gradlew test --no-daemon
 
