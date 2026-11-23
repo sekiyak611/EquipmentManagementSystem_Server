@@ -2,56 +2,31 @@ package jp.co.highjunk.equipment.api.equipment.mine.search.item;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
 import jp.co.highjunk.equipment.common.calendar.ReminderCalendar;
-import jp.co.highjunk.equipment.common.security.LoginUser;
+import jp.co.highjunk.equipment.testsupport.EquipmentMineApiTestBase;
 
 /**
  * B-01 自分が借りている備品（docs/API設計.md 3.2・4.5、詳細設計 equipment/mine/B-01_自分の備品の一覧.md）のテスト。
  * 書き込みは、テストが終わるたびに元に戻す（@Transactional）。今日は、アプリの時計（Clock）の今日。
  * 一般社員 ippan@example.com・総務 soumu@example.com は、どちらも LOAN_SELF を持つ。
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
 @DisplayName("B-01 自分が借りている備品")
-class EquipmentMineSearchItemApiTest {
-
-	static final String SOUMU = "soumu@example.com";
-
-	static final String IPPAN = "ippan@example.com";
-
-	@Autowired
-	MockMvc mockMvc;
-
-	@Autowired
-	JdbcTemplate jdbc;
-
-	@Autowired
-	Clock clock;
+class EquipmentMineSearchItemApiTest extends EquipmentMineApiTestBase {
 
 	@Autowired
 	ReminderCalendar reminderCalendar;
@@ -255,46 +230,5 @@ class EquipmentMineSearchItemApiTest {
 
 	ResultActions search(String email) throws Exception {
 		return mockMvc.perform(get("/api/me/loans").with(login(email)));
-	}
-
-	RequestPostProcessor login(String email) {
-		return loginAs(userId(email));
-	}
-
-	RequestPostProcessor loginAs(long userId) {
-		return authentication(new UsernamePasswordAuthenticationToken(new LoginUser(userId, LocalDateTime.now()),
-				null, List.of()));
-	}
-
-	long userId(String email) {
-		return jdbc.queryForObject("SELECT id FROM users WHERE email = ?", Long.class, email);
-	}
-
-	/** 権限項目を1つも持たない権限（ロール）を作り、ID を返す */
-	long insertRoleWithoutPermission() {
-		jdbc.update("INSERT INTO roles (name, is_default, created_at, updated_at) VALUES ('権限なし', FALSE, NOW(), NOW())");
-		return jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
-	}
-
-	long insertUser(String email, long roleId) {
-		jdbc.update("INSERT INTO users (name, email, role_id, created_at, updated_at) VALUES ('権限なしの人', ?, ?, NOW(), NOW())",
-				email, roleId);
-		return jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
-	}
-
-	/** 備品を1つ入れ、ID を返す（種別は ID で決める。1＝PC、2＝ヘッドセット） */
-	long equipment(String managementNo, String status, long categoryId, String maker, String model,
-			LocalDate lastConfirmedOn) {
-		jdbc.update("INSERT INTO equipment (management_no, category_id, maker, model, status, last_confirmed_on,"
-				+ " created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())", managementNo, categoryId, maker,
-				model, status, lastConfirmedOn);
-		return jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
-	}
-
-	/** 貸出履歴を1つ入れ、ID を返す（返却日があれば返却済み） */
-	long loan(long equipmentId, long userId, LocalDate lentOn, LocalDate dueOn, LocalDate returnedOn) {
-		jdbc.update("INSERT INTO loans (equipment_id, user_id, lent_on, due_on, returned_on, created_at, updated_at)"
-				+ " VALUES (?, ?, ?, ?, ?, NOW(), NOW())", equipmentId, userId, lentOn, dueOn, returnedOn);
-		return jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
 	}
 }
