@@ -20,7 +20,7 @@ import jp.co.highjunk.equipment.dao.entity.Equipment;
 /**
  * EquipmentCustomMapper の、B-04 で足したメソッド selectByIdsForUpdate・updateLastConfirmedOnByIds
  * （詳細設計 equipment/mine/B-04_確認した.md の7章 No.2・3）のテスト。
- * 書き込みは、テストが終わるたびに元に戻す（@Transactional）。行を押さえること（FOR UPDATE）は、CustomMapperBulkLockTest で確かめる。
+ * 書き込みは、テストが終わるたびに元に戻す（@Transactional）。行を押さえること（FOR UPDATE）は、EquipmentCustomMapperLockTest で確かめる。
  */
 @SpringBootTest
 @Transactional
