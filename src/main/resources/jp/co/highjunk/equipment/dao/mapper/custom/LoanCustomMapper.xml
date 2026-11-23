@@ -12,4 +12,23 @@
 		  AND deleted_at IS NULL
 		FOR UPDATE
 	</select>
+
+	<!-- B-04：複数の備品の、今借りている貸出履歴を、まとめて押さえる。active_equipment_id は、返却日が空で取り消されていない行にだけ
+	     備品の ID が入る列（一意。データ設計 5.7）。ORDER BY は結果を並べるだけで、押さえる順は、この索引の順で決まる -->
+	<select id="selectCurrentByEquipmentIdsForUpdate" resultType="jp.co.highjunk.equipment.dao.entity.Loan">
+		SELECT id, equipment_id, user_id, lent_on, due_on, returned_on, memo, active_equipment_id,
+		       deleted_at, version, created_at, created_by, updated_at, updated_by
+		FROM loans
+		<where>
+		  <choose>
+		    <when test="equipmentIds == null or equipmentIds.isEmpty()">1 = 0</when>
+		    <otherwise>
+		      active_equipment_id IN
+		      <foreach collection="equipmentIds" item="equipmentId" open="(" separator="," close=")">#{equipmentId}</foreach>
+		    </otherwise>
+		  </choose>
+		</where>
+		ORDER BY active_equipment_id
+		FOR UPDATE
+	</select>
 </mapper>

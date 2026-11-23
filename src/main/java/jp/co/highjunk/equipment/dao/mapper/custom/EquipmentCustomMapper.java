@@ -1,5 +1,7 @@
 package jp.co.highjunk.equipment.dao.mapper.custom;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -33,6 +35,19 @@ public interface EquipmentCustomMapper {
 	 * （C-06 の8章）。ない・削除済みなら null。Example では FOR UPDATE を書けないので、手で書く。
 	 */
 	Equipment selectByIdForUpdate(@Param("id") long id);
+
+	/**
+	 * ID の一覧の、削除されていない備品を、まとめて読み、行を押さえる（FOR UPDATE）。結果は ID の昇順（主キーの順に押さえる）。
+	 * 削除済み・ない ID は、結果に出ない。ids が空なら、何も返さない（B-04 の7章）。
+	 */
+	List<Equipment> selectByIdsForUpdate(@Param("ids") List<Long> ids);
+
+	/**
+	 * ID の一覧の、削除されていない備品の最終確認日を、まとめて変える。version は、列の値に1を足す（行ごとに version が違うため、式で書く。
+	 * データ設計 2章：保存のたびに1増やす）。更新日時・更新者も入れる。更新した件数を返す。ids が空なら、何も更新しない（0）（B-04 の7章）。
+	 */
+	int updateLastConfirmedOnByIds(@Param("ids") List<Long> ids, @Param("lastConfirmedOn") LocalDate lastConfirmedOn,
+			@Param("updatedAt") LocalDateTime updatedAt, @Param("updatedBy") long updatedBy);
 
 	/**
 	 * 条件に合う、削除されていない備品の数（C-01 の7章）。
