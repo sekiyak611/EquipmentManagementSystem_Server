@@ -1,0 +1,65 @@
+# Server のテスト（JUnit・ArchUnit）を、プルリクエストのたびに全件動かす（ZPOP-433）。
+# 赤なら、マージしない（CLAUDE.md 6章）。テスト用のデータベースは、この中で MySQL 8.4 を起動して使う。
+# 秘密の値は使わない（テスト用のダミーだけ。本物の値は、GitHub の Secrets にも入れていない）。
+name: Server test
+
+on:
+  pull_request:
+    branches: [release/main]
+  workflow_dispatch:
+
+# 同じブランチで続けて push したら、古い実行は止める
+concurrency:
+  group: server-test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Server test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # 画面・テストの時刻の基準（app.time-zone と同じ）
+      TZ: Asia/Tokyo
+      # secret.yml の代わり。Spring が環境変数から読む（ダミーの値。この CI の MySQL だけで使う）
+      SPRING_DATASOURCE_USERNAME: equipment
+      SPRING_DATASOURCE_PASSWORD: ci-only-password
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only-root-password
+          MYSQL_DATABASE: equipment_test
+          MYSQL_USER: equipment
+          MYSQL_PASSWORD: ci-only-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci-only-root-password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: テストを全件動かす
+        run: ./gradlew test --no-daemon
+
+      # 失敗したときだけ、結果（HTML のレポート）を残す。何が落ちたかを、あとから見るため
+      - name: 失敗したときの結果を残す
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-test-report
+          path: build/reports/tests/test
+          retention-days: 14
