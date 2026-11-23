@@ -53,6 +53,11 @@ class ErrorTestController {
 		throw new ConflictException("この備品はすでに貸し出されています");
 	}
 
+	@GetMapping("/api/test-errors/forbidden")
+	ApiResponse<Void> forbidden() {
+		throw new ForbiddenException("ほかの人が借りているため、返却はできません。");
+	}
+
 	@GetMapping("/api/test-errors/csv")
 	ApiResponse<Void> csv() {
 		throw new CsvErrorException(List.of(ErrorItem.ofCsvRow(12, "D003", "不明の備品です。")));

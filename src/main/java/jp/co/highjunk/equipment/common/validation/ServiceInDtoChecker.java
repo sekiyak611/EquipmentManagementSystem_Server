@@ -17,6 +17,7 @@ import jp.co.highjunk.equipment.common.error.BusinessRuleException;
 import jp.co.highjunk.equipment.common.error.ConflictException;
 import jp.co.highjunk.equipment.common.error.ErrorItem;
 import jp.co.highjunk.equipment.common.error.FieldErrorException;
+import jp.co.highjunk.equipment.common.error.ForbiddenException;
 import jp.co.highjunk.equipment.common.error.NotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +27,7 @@ import lombok.RequiredArgsConstructor;
  *
  * <p>確かめる順番は ServiceCheckOrder の First → Second → Default。ある段で守れないものがあれば、そこで止める。
  * 返し方は、チェック用アノテーションの payload（ServiceErrorType）で決める。1つの段で2つ以上の種類が出たら、
- * NotFound → Conflict → BusinessRule → 入力欄のエラーの順に、先のものを返す。
+ * NotFound → Forbidden → Conflict → BusinessRule → 入力欄のエラーの順に、先のものを返す。
  */
 @Component
 @RequiredArgsConstructor
@@ -41,6 +42,7 @@ public class ServiceInDtoChecker {
 	 * ServiceInDto を確かめる。すべて守れていれば何もしない。
 	 *
 	 * @throws NotFoundException     payload が NotFound のチェックを守れないとき（404）
+	 * @throws ForbiddenException    payload が Forbidden のチェックを守れないとき（403）
 	 * @throws ConflictException     payload が Conflict のチェックを守れないとき（409）
 	 * @throws BusinessRuleException payload が BusinessRule のチェックを守れないとき（400。errors なし）
 	 * @throws FieldErrorException   payload のないチェックを守れないとき（400。errors に入力欄ごとの文）
@@ -57,6 +59,10 @@ public class ServiceInDtoChecker {
 	private static RuntimeException toException(Class<?> dtoClass, Set<ConstraintViolation<Object>> violations) {
 		if (has(violations, ServiceErrorType.NotFound.class)) {
 			return new NotFoundException();
+		}
+		ConstraintViolation<Object> forbidden = first(violations, ServiceErrorType.Forbidden.class);
+		if (forbidden != null) {
+			return new ForbiddenException(forbidden.getMessage());
 		}
 		ConstraintViolation<Object> conflict = first(violations, ServiceErrorType.Conflict.class);
 		if (conflict != null) {

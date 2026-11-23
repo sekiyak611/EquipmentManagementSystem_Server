@@ -115,6 +115,17 @@ class GlobalExceptionHandlerApiTest {
 	}
 
 	@Test
+	@DisplayName("ほかの人のものは操作できない（ForbiddenException）：403。message に各機能が渡した文。data・errors は null")
+	void forbiddenByOwner() throws Exception {
+		mockMvc.perform(get("/api/test-errors/forbidden"))
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.status").value(403))
+				.andExpect(jsonPath("$.message").value("ほかの人が借りているため、返却はできません。"))
+				.andExpect(jsonPath("$.data").value(org.hamcrest.Matchers.nullValue()))
+				.andExpect(jsonPath("$.errors").value(org.hamcrest.Matchers.nullValue()));
+	}
+
+	@Test
 	@DisplayName("業務チェックの入力欄のエラー（FieldErrorException）：400。入力の誤りと同じ文で、errors に入力欄ごとの文。data は null。行番号・管理番号の項目は出さない")
 	void fieldError() throws Exception {
 		mockMvc.perform(get("/api/test-errors/field-error"))
