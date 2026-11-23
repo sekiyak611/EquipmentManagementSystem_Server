@@ -15,6 +15,7 @@
 
 - パッケージの分け方とクラスの名前は、共通の決まりの 4.1 と 5章のとおり（1つの API に1つのパッケージ。2026-11-15 に変えた）。
 - Java・XML（SQL）の書き方は、`.claude/rules/java.md`（対象のファイルを触ると自動で読み込まれる）。構造の決まり（API どうしの依存、`@PreAuthorize`、Clock、record、JOIN・サブクエリなど）の一部は、`ArchitectureTest`・`MapperXmlRulesTest` が確かめる。落ちたら、テストを直さず、コードを直す。例外を増やすときは、人に確かめる。
+- 開発は、工程ごとに MR を出し、マージしてから次へ進む（詳細設計 → 実装 → 単体テスト。共通の決まり 11章、Document の `internaldesign/決まり/開発フロー.md`）。自分の役割は、このフォルダの `.claude/settings.local.json` の `DEV_ROLE`（`junior`・`senior`・`leader`。例は Document の `internaldesign/settings-local/`）。
 - Gradle のプロジェクト名は、フォルダ名と同じ `EquipmentManagementSystem_Server`（settings.gradle）。Eclipse は、ワークスペースの直下にあるプロジェクトの名前を、フォルダ名と同じにする必要があるため。変えない。
 - 秘密の値（データベースのパスワードなど）は、このフォルダの `secret.yml` に書く（Gitで管理しない。見本は `secret.example.yml`）。
 - 開発のときのログは、このフォルダの `logs/` に出る。
