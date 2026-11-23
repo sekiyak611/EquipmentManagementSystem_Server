@@ -16,6 +16,10 @@ public final class ServiceErrorType {
 	public interface NotFound extends Payload {
 	}
 
+	/** ほかの人のものは操作できない（ForbiddenException。403。文はチェック用アノテーションの message）。 */
+	public interface Forbidden extends Payload {
+	}
+
 	/** ぶつかった（ConflictException。409。文はチェック用アノテーションの message）。 */
 	public interface Conflict extends Payload {
 	}

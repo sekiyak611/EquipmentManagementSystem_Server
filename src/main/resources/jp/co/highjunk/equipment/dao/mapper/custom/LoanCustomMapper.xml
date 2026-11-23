@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- loans の、手で書く SQL（CLAUDE.md 4.1・5章）。JOIN とサブクエリは使わない。値は #{} で渡す。 -->
+<mapper namespace="jp.co.highjunk.equipment.dao.mapper.custom.LoanCustomMapper">
+
+	<!-- B-03：確かめてから書き換えるまで、行を押さえる。取り消された貸出履歴は、ないものとして扱う -->
+	<select id="selectByIdForUpdate" resultType="jp.co.highjunk.equipment.dao.entity.Loan">
+		SELECT id, equipment_id, user_id, lent_on, due_on, returned_on, memo, active_equipment_id,
+		       deleted_at, version, created_at, created_by, updated_at, updated_by
+		FROM loans
+		WHERE id = #{id}
+		  AND deleted_at IS NULL
+		FOR UPDATE
+	</select>
+</mapper>
